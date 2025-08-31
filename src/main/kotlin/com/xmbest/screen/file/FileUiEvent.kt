@@ -3,4 +3,14 @@ package com.xmbest.screen.file
 sealed class FileUiEvent(val path: String) {
     object Refresh : FileUiEvent("")
     class NavigateToPath(path: String) : FileUiEvent(path)
+
+    /**
+     * 开始拖拽
+     * @param files 拖拽的文件列表
+     * @param subPath 目标路径，不传为当前路径，传则当前路径[subPath]
+     */
+    class StartDrag(val files: List<String>) : FileUiEvent("")
+    object DragEnd : FileUiEvent("")
+    class UploadFiles(val files: List<String>, val remotePath: String) : FileUiEvent(remotePath)
+    object Imported : FileUiEvent("")
 }

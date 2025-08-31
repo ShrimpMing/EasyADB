@@ -29,6 +29,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${properties["kotlin.version"]}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${properties["kotlin.version"]}")
     implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:${properties["lifecycle.viewmodel.compose.version"]}")
+    implementation("io.github.vinceglb:filekit-core:0.10.0")
+    implementation("io.github.vinceglb:filekit-dialogs:0.10.0")
     implementation(project(":ddmlib"))
     testImplementation(kotlin("test"))
 }

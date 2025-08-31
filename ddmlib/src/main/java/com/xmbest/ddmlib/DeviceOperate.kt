@@ -3,13 +3,9 @@ package com.xmbest.ddmlib
 import com.android.ddmlib.FileListingService
 import com.android.ddmlib.InstallReceiver
 import com.android.ddmlib.MultiLineReceiver
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.awt.Image
+import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -23,6 +19,8 @@ object DeviceOperate {
         get() = FileManager.fileListingService.value
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO + CoroutineName(TAG))
+
+    private const val CMD_CLOSE_TIMEOUT = 3
 
     fun root(): Boolean {
         Log.i(TAG, "adb root")
@@ -77,8 +75,39 @@ object DeviceOperate {
         shell("chmod $auth $path")
     }
 
-    fun push(local: String, remote: String) {
-        device?.pushFile(local, remote)
+    /**
+     * push多个文件到系统
+     * @param files 文件列表
+     * @param remotePath 需要上传到位置
+     * @param isWindows 是否windows平台
+     * @param file 这里非windows需要传，即软件执行文件
+     */
+    fun push(
+        files: List<String>,
+        remotePath: String,
+        isWindows: Boolean = true,
+        isMacOs: Boolean = false,
+        file: File
+    ) {
+        device?.let { device ->
+            // 构建多文件push命令
+            val fileArgs = files.joinToString(" ") { "\"$it\"" }
+            val adbCommand =
+                "${DeviceManager.adbPath.value} -s ${device.serialNumber} push $fileArgs \"$remotePath/\""
+            Log.d(TAG, "Original ADB command: $adbCommand")
+            var command = adbCommand
+            if (isWindows) {
+                command =
+                    "cmd.exe /c start cmd.exe /C \"echo Executing: $adbCommand && $adbCommand && echo. && echo Command completed. Window will close in 3 seconds... && timeout /t $CMD_CLOSE_TIMEOUT /nobreak > nul\""
+            } else if (isMacOs) {
+                writeShell(
+                    file,
+                    adbCommand
+                )
+                command = "open -b com.apple.terminal ${file.absolutePath}"
+            }
+            CmdUtil.run(command)
+        }
     }
 
     fun pull(remote: String, local: String) {
@@ -126,48 +155,39 @@ object DeviceOperate {
      * 查找当前文件列表
      */
     suspend fun ls(parentPath: String) = suspendCoroutine {
-        val suspendSingle = it
         fileListingService?.apply {
             getChildren(
                 FileListingService.FileEntry(
-                    root,
-                    parentPath,
-                    FileListingService.TYPE_DIRECTORY,
-                    device?.isRoot == true
-                ),
-                false,
-                object : FileListingService.IListingReceiver {
+                    root, parentPath, FileListingService.TYPE_DIRECTORY, device?.isRoot == true
+                ), false, object : FileListingService.IListingReceiver {
                     override fun setChildren(
-                        entry: FileListingService.FileEntry?,
-                        children: Array<out FileListingService.FileEntry>?
+                        entry: FileListingService.FileEntry?, children: Array<out FileListingService.FileEntry>?
                     ) {
-                        suspendSingle.resume(children?.asList() ?: emptyList())
+                        it.resume(children?.asList() ?: emptyList())
                     }
 
                     override fun refreshEntry(entry: FileListingService.FileEntry?) {
                     }
-                }
-            )
+                })
         }
     }
 
     fun shell(command: String) = device?.executeShellCommand(command, EmptyReceiver())
 
     suspend fun shell(command: String, timeMillis: Long) = suspendCoroutine {
-        val suspendSingle = it
         coroutineScope.launch {
             device?.executeShellCommand(command, object : MultiLineReceiver() {
                 override fun processNewLines(lines: Array<out String>?) {
                     if (lines?.isNotEmpty() == true && isActive) {
                         val str = lines.filter { line -> line.isNotEmpty() }.joinToString("\n")
-                        suspendSingle.resume(str)
+                        it.resume(str)
                     }
                 }
 
                 override fun isCancelled() = false
             })
             delay(timeMillis)
-            suspendSingle.resume("")
+            it.resume("")
         }
     }
 }

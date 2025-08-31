@@ -33,7 +33,7 @@ fun FileContent(file: FileListingService.FileEntry, viewModel: FileViewModel) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(24.dp),
-        modifier = Modifier.fillMaxWidth().padding(end = 12.dp, bottom = 6.dp)
+        modifier = Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, bottom = 6.dp)
             .clip(CardShape).background(MaterialTheme.colors.surface)
             .combinedClickable(onDoubleClick = {
                 if (file.isDirectory) {

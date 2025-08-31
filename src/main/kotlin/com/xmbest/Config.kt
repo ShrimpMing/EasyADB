@@ -6,8 +6,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import com.xmbest.model.Theme
-import com.xmbest.theme.Blue
-import com.xmbest.theme.Classic
 import com.xmbest.theme.Night
 import com.xmbest.theme.Purple
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Locale
+import java.util.*
 
 object Config {
 
@@ -25,7 +23,7 @@ object Config {
 
     const val STRINGS_NAME = "strings"
 
-    val lightColors = Blue
+    val lightColors = Purple
 
     val darkColors = Night
 

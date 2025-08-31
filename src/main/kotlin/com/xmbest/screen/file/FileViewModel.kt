@@ -3,31 +3,36 @@ package com.xmbest.screen.file
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.Cable
-import androidx.compose.material.icons.filled.DeviceHub
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.filled.*
 import androidx.lifecycle.viewModelScope
 import com.android.ddmlib.FileListingService
 import com.xmbest.FILE_SPLIT
+import com.xmbest.appStorageAbsolutePath
 import com.xmbest.base.BaseViewModel
 import com.xmbest.ddmlib.DeviceOperate
 import com.xmbest.ddmlib.FileManager
 import com.xmbest.ddmlib.Log
+import com.xmbest.push
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import io.github.vinceglb.filekit.path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.jetbrains.skiko.hostOs
+import java.io.File
 import java.text.DecimalFormat
 
 class FileViewModel : BaseViewModel<FileUiState>() {
 
     companion object {
         private const val TAG = "FileViewModel"
+        private const val GB = 1024 * 1024 * 1024 //定义GB的计算常量
+        private const val MB = 1024 * 1024 //定义MB的计算常量
+        private const val KB = 1024 //定义KB的计算常量
     }
 
     override val _uiState: MutableStateFlow<FileUiState> = MutableStateFlow(FileUiState())
@@ -48,6 +53,10 @@ class FileViewModel : BaseViewModel<FileUiState>() {
             when (event) {
                 is FileUiEvent.NavigateToPath -> navigateToPath(event.path)
                 is FileUiEvent.Refresh -> refreshCurrentDirectory()
+                is FileUiEvent.StartDrag -> handleStartDrag(event.files)
+                is FileUiEvent.DragEnd -> handleDragEnd()
+                is FileUiEvent.UploadFiles -> handleUploadFiles(event.files, event.remotePath)
+                is FileUiEvent.Imported -> handleImported()
             }
         }
 
@@ -124,32 +133,26 @@ class FileViewModel : BaseViewModel<FileUiState>() {
      * @param size 字节数大小
      */
     fun byte2Gb(size: String): String {
-        var sizeInt = 0
+        var sizeInt: Int
 
         if (size.contains(",")) {
             val split = size.split(",")
             if (split.size > 1) {
                 val sizeInner = split[1].trim()
-                try {
-                    sizeInt = sizeInner.toInt()
-                } catch (e: Exception) {
-                    return "0B"
-                }
+                return byte2Gb(runCatching {
+                    sizeInner.toInt()
+                }.getOrNull()?.toString() ?: "0")
             }
         }
 
         try {
             sizeInt = size.toInt()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return "0B"
         }
         //获取到的size为：1705230
-        val GB = 1024 * 1024 * 1024 //定义GB的计算常量
-        val MB = 1024 * 1024 //定义MB的计算常量
-        val KB = 1024 //定义KB的计算常量
         val df = DecimalFormat("0.00") //格式化小数
-        var resultSize = ""
-        resultSize = if (sizeInt / GB >= 1) {
+        val resultSize: String = if (sizeInt / GB >= 1) {
             //如果当前Byte的值大于等于1GB
             df.format((sizeInt / GB.toFloat()).toDouble()) + "GB"
         } else if (sizeInt / MB >= 1) {
@@ -163,9 +166,46 @@ class FileViewModel : BaseViewModel<FileUiState>() {
         }
         return resultSize
     }
-}
 
-data class FileTypeInfo(
-    val icon: ImageVector,
-    val text: String
-)
+    // 拖拽事件处理方法
+    private fun handleStartDrag(files: List<String>) {
+        val fileCount = files.size
+        val tipText = if (fileCount == 1) {
+            getString("file.drag.uploadSingle").format(files.first().substringAfterLast("/"))
+        } else {
+            getString("file.drag.uploadMultiple").format(fileCount)
+        }
+
+        _uiState.value = _uiState.value.copy(
+            isDragging = true,
+            uploadTipText = tipText + " " + getString("file.drag.toCurrentPath").format(uiState.value.parentPath)
+        )
+    }
+
+    private fun handleDragEnd() {
+        _uiState.value = _uiState.value.copy(
+            isDragging = false,
+            uploadTipText = "",
+        )
+    }
+
+    private suspend fun handleUploadFiles(files: List<String>, remotePath: String) {
+        withContext(Dispatchers.IO) {
+            DeviceOperate.push(
+                files = files,
+                remotePath = remotePath,
+                isWindows = hostOs.isWindows,
+                isMacOs = hostOs.isMacOS,
+                file = File(appStorageAbsolutePath, push.second)
+            )
+        }
+        refreshCurrentDirectory()
+    }
+
+    private suspend fun handleImported() {
+        val files = FileKit.openFilePicker(mode = FileKitMode.Multiple())
+        files?.map { it.path }?.let {
+            handleUploadFiles(it, uiState.value.parentPath)
+        }
+    }
+}

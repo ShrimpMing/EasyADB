@@ -9,6 +9,8 @@ import java.io.File
  */
 val adb = Pair("adb", if (hostOs.isWindows) "adb.exe" else "adb")
 val cfg = Pair("config", "config.json")
+val push = Pair("sh", "push.sh")
+val pull = Pair("sh", "pull.sh")
 
 /**
  * 文件分隔符
