@@ -1,8 +1,8 @@
 package com.xmbest
 
 import androidx.compose.material.SnackbarHostState
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.xmbest.model.DialogState
 import org.jetbrains.skiko.hostOs
 import java.io.File
 
@@ -34,4 +34,9 @@ val programAdbAbsolutePath: String =
 // 创建LocalSnackbarHostState，类似于LocalContext.current的使用方式
 val LocalSnackbarHostState = staticCompositionLocalOf<SnackbarHostState> {
     error("No SnackbarHostState provided")
+}
+
+// 添加全局弹窗状态
+val LocalDialogState = staticCompositionLocalOf<androidx.compose.runtime.MutableState<DialogState>> {
+    error("No DialogState provided")
 }

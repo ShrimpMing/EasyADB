@@ -41,9 +41,9 @@ object DeviceOperate {
         shell("kill $pidStr")
     }
 
-    fun rm(filePath: String) {
+    fun rm(filePath: List<String>) {
         Log.i(TAG, "adb shell rm -rf $filePath")
-        device?.removeRemotePackage(filePath)
+        device?.let { device -> filePath.forEach { device.removeRemotePackage(it) } }
     }
 
     fun inputKey(key: Int) {

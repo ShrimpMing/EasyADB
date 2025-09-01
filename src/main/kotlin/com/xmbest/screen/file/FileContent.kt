@@ -24,9 +24,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.ddmlib.FileListingService
+import com.xmbest.LocalDialogState
 import com.xmbest.theme.CardShape
 import com.xmbest.theme.ChipShape
 import com.xmbest.theme.TextFieldShape
+import com.xmbest.util.DialogUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +36,7 @@ fun FileContent(file: FileListingService.FileEntry, viewModel: FileViewModel) {
     val uiState = viewModel.uiState.collectAsState().value
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val dialogState = LocalDialogState.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -163,7 +166,14 @@ fun FileContent(file: FileListingService.FileEntry, viewModel: FileViewModel) {
                 ) {
                     IconButton(
                         onClick = {
-                            // TODO: 实现删除功能
+                            DialogUtil.showWarning(
+                                dialogState = dialogState,
+                                message = viewModel.getString("file.delete.confirm").format(file.fullPath),
+                                onConfirm = {
+                                    viewModel.onEvent(FileUiEvent.DeleteFiles(listOf(file)))
+                                },
+                                onCancel = {}
+                            )
                         },
                         modifier = Modifier.size(32.dp)
                     ) {

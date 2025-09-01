@@ -18,20 +18,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.xmbest.LocalSnackbarHostState
+import com.xmbest.LocalDialogState
+import com.xmbest.component.GlobalDialog
+import com.xmbest.model.DialogState
 
 
 @Composable
 fun RouterScreen(viewModel: RouterViewModule = viewModel()) {
     val uiState = viewModel.uiState.collectAsState().value
     val snackbarHostState = remember { SnackbarHostState() }
+    val dialogState = remember { mutableStateOf(DialogState()) }
 
-    CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+    CompositionLocalProvider(
+        LocalSnackbarHostState provides snackbarHostState,
+        LocalDialogState provides dialogState
+    ) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
         ) {
@@ -40,6 +48,9 @@ fun RouterScreen(viewModel: RouterViewModule = viewModel()) {
                 Right(modifier = Modifier.fillMaxHeight().weight(1f), uiState)
             }
         }
+
+        // 添加全局弹窗
+        GlobalDialog()
     }
 }
 

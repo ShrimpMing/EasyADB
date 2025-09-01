@@ -26,7 +26,6 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.skiko.hostOs
 import java.io.File
 import java.text.DecimalFormat
-import kotlin.text.any
 
 class FileViewModel : BaseViewModel<FileUiState>() {
 
@@ -57,9 +56,10 @@ class FileViewModel : BaseViewModel<FileUiState>() {
                 is FileUiEvent.Refresh -> refreshCurrentDirectory()
                 is FileUiEvent.StartDrag -> handleStartDrag(event.files)
                 is FileUiEvent.DragEnd -> handleDragEnd()
+                is FileUiEvent.Imported -> handleImported()
                 is FileUiEvent.UploadFiles -> handleUploadFiles(event.files, uiState.value.parentPath)
                 is FileUiEvent.DownloadFiles -> handleDownloadFiles(event.files)
-                is FileUiEvent.Imported -> handleImported()
+                is FileUiEvent.DeleteFiles -> handleDeleteFiles(event.files)
                 is FileUiEvent.Toast -> handleToast(event.message)
             }
         }
@@ -217,6 +217,13 @@ class FileViewModel : BaseViewModel<FileUiState>() {
                 file = File(appStorageAbsolutePath, exec.second)
             )
         }
+    }
+
+    private suspend fun handleDeleteFiles(files: List<FileListingService.FileEntry>) {
+        withContext(Dispatchers.IO) {
+            DeviceOperate.rm(files.map { it.fullPath })
+        }
+        refreshCurrentDirectory()
     }
 
     private suspend fun handleImported() {

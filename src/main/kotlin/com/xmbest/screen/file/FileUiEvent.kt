@@ -13,8 +13,9 @@ sealed class FileUiEvent(val path: String) {
      */
     class StartDrag(val files: List<String>) : FileUiEvent("")
     object DragEnd : FileUiEvent("")
+    object Imported : FileUiEvent("")
     class UploadFiles(val files: List<String>) : FileUiEvent("")
     class DownloadFiles(val files: List<FileListingService.FileEntry>) : FileUiEvent("")
-    object Imported : FileUiEvent("")
+    class DeleteFiles(val files: List<FileListingService.FileEntry>) : FileUiEvent("")
     class Toast(val message: String) : FileUiEvent("")
 }
