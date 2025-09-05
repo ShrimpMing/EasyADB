@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FileDownload
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.ddmlib.FileListingService
 import com.xmbest.LocalDialogState
+import com.xmbest.ddmlib.ClipboardUtil
 import com.xmbest.theme.CardShape
 import com.xmbest.theme.ChipShape
 import com.xmbest.theme.TextFieldShape
@@ -119,6 +121,27 @@ fun FileContent(file: FileListingService.FileEntry, viewModel: FileViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // 复制路径按钮
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                    tooltip = { Text(viewModel.getString("file.copyPath")) },
+                    state = rememberTooltipState()
+                ) {
+                    IconButton(
+                        onClick = {
+                            ClipboardUtil.setSysClipboardText(file.absolutePath)
+                        },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = viewModel.getString("file.copyPath"),
+                            tint = MaterialTheme.colors.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
                 // 重命名按钮
                 TooltipBox(
                     positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),

@@ -79,61 +79,60 @@ fun FileScreen(viewModel: FileViewModel = viewModel()) {
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .dragAndDropTarget(
+            modifier = Modifier.fillMaxSize().dragAndDropTarget(
                     shouldStartDragAndDrop = { event ->
                         try {
                             val transferable = event.awtTransferable
-                            transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
-                                    transferable.isDataFlavorSupported(DataFlavor.stringFlavor)
+                            transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor) || transferable.isDataFlavorSupported(
+                                DataFlavor.stringFlavor
+                            )
                         } catch (_: Exception) {
                             false
                         }
-                    },
-                    target = dragAndDropTarget
+                    }, target = dragAndDropTarget
                 )
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .padding(bottom = 6.dp)
-                    .scrollable(scrollState, Orientation.Vertical)
+                modifier = Modifier.fillMaxSize().padding(bottom = 6.dp).scrollable(scrollState, Orientation.Vertical)
             ) {
                 stickyHeader {
                     FileHeader(viewModel)
                     Spacer(modifier = Modifier.height(6.dp))
                 }
-                items(uiState.children) {
-                    FileContent(it, viewModel)
+
+                if (uiState.children.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            FileEmptyScreen(viewModel)
+                        }
+                    }
+                } else {
+                    items(uiState.children) {
+                        FileContent(it, viewModel)
+                    }
                 }
             }
 
             // 拖拽提示UI
             if (uiState.isDragging) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.primary.copy(alpha = 0.1f))
+                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.primary.copy(alpha = 0.1f))
                         .padding(3.dp) // 添加内边距确保边框完全显示
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colors.primary,
-                                shape = CardShape
-                            ),
-                        contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxSize().border(
+                                width = 2.dp, color = MaterialTheme.colors.primary, shape = CardShape
+                            ), contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = uiState.uploadTipText,
                             color = MaterialTheme.colors.primary,
                             fontSize = 18.sp,
-                            modifier = Modifier
-                                .clip(CardShape)
-                                .background(MaterialTheme.colors.surface.copy(alpha = 0.9f))
-                                .padding(16.dp)
+                            modifier = Modifier.clip(CardShape)
+                                .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)).padding(16.dp)
                         )
                     }
                 }
