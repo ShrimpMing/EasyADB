@@ -2,6 +2,7 @@ package me.xmbest.screen.file
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -75,6 +76,7 @@ fun FileHeader(viewModel: FileViewModel) {
             .padding(12.dp)
     ) {
         BreadcrumbNavigation(
+            viewModel,
             pathParts = pathParts,
             onNavigate = { path -> viewModel.onEvent(FileUiEvent.NavigateToPath(path)) },
             onCopyPath = { path -> ClipboardUtil.setSysClipboardText(path.ifEmpty { FILE_SPLIT }) },
@@ -147,6 +149,7 @@ fun FileHeader(viewModel: FileViewModel) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BreadcrumbNavigation(
+    viewModel: FileViewModel,
     pathParts: List<Pair<String, String>>,
     onNavigate: (String) -> Unit,
     onCopyPath: (String) -> Unit,
@@ -154,43 +157,50 @@ private fun BreadcrumbNavigation(
 ) {
     val scrollState = rememberScrollState()
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(scrollState)
-    ) {
-        pathParts.forEachIndexed { index, part ->
-            val isLast = index == pathParts.size - 1
-            val clickPath = part.second
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .weight(1f)
+                .horizontalScroll(scrollState)
+        ) {
+            pathParts.forEachIndexed { index, part ->
+                val isLast = index == pathParts.size - 1
+                val clickPath = part.second
 
-            if (index > 0) {
-                Icon(
-                    Icons.Default.ChevronRight,
-                    contentDescription = "",
-                    tint = MaterialTheme.colors.onBackground
-                )
-            }
-
-            ContextMenuArea(
-                items = {
-                    listOf(
-                        ContextMenuItem(copyPathLabel) {
-                            onCopyPath(clickPath)
-                        }
+                if (index > 0) {
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = "",
+                        tint = MaterialTheme.colors.onBackground
                     )
                 }
-            ) {
-                PathBreadcrumb(
-                    text = part.first,
-                    isRoot = index == 0,
-                    isLast = isLast,
-                    onClick = { onNavigate(clickPath) }
-                )
+
+                ContextMenuArea(
+                    items = {
+                        listOf(
+                            ContextMenuItem(copyPathLabel) {
+                                onCopyPath(clickPath)
+                            }
+                        )
+                    }
+                ) {
+                    PathBreadcrumb(
+                        text = part.first,
+                        isRoot = index == 0,
+                        isLast = isLast,
+                        onClick = { onNavigate(clickPath) }
+                    )
+                }
             }
         }
+
+        JumpToPathButton(
+            viewModel = viewModel
+        )
     }
+
 }
 
 @Composable
@@ -318,6 +328,22 @@ private fun FunctionButton(
             text = text,
             color = MaterialTheme.colors.onSurface,
             fontSize = 12.sp
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun JumpToPathButton(
+    viewModel: FileViewModel
+) {
+    TooltipArea(tooltip = { Text(viewModel.getString("file.jumpToClipboard")) }) {
+        FunctionButton(
+            icon = Icons.Default.ArrowOutward,
+            text = viewModel.getString("file.jump"),
+            onClick = {
+                viewModel.onEvent(FileUiEvent.JumpToClipboardPath)
+            }
         )
     }
 }

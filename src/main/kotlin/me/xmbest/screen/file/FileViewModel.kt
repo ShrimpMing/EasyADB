@@ -66,6 +66,7 @@ class FileViewModel : BaseViewModel<FileUiState>() {
                 is FileUiEvent.CreateFile -> handleCreateFile(event.fileName)
                 is FileUiEvent.RenameFile -> handleRenameFile(event.oldPath, event.newName)
                 is FileUiEvent.Toast -> handleToast(event.message)
+                is FileUiEvent.JumpToClipboardPath -> handleJumpToClipboardPath()
             }
         }
 
@@ -296,5 +297,58 @@ class FileViewModel : BaseViewModel<FileUiState>() {
 
     private fun handleToast(message: String) {
         _uiState.value = _uiState.value.copy(toast = message)
+    }
+
+    private suspend fun handleJumpToClipboardPath() {
+        withContext(Dispatchers.IO) {
+            try {
+                // 读取剪切板内容
+                val clipboardText = me.xmbest.ddmlib.ClipboardUtil.getSysClipboardText()
+                
+                if (clipboardText.isNullOrBlank()) {
+                    handleToast(getString("file.jumpToClipboard.emptyClipboard"))
+                    return@withContext
+                }
+                
+                // 验证路径格式（简单验证是否以/开头）
+                val path = clipboardText.trim()
+                if (!path.startsWith(FILE_SPLIT)) {
+                    handleToast(getString("file.jumpToClipboard.invalidPath"))
+                    return@withContext
+                }
+                
+                // 检查路径是否存在并获取文件信息
+                val fileEntry = getFileEntry(path)
+                if (fileEntry == null) {
+                    handleToast(getString("file.jumpToClipboard.pathNotExist"))
+                    return@withContext
+                }
+                
+                // 判断是文件还是目录，并执行相应的跳转逻辑
+                if (fileEntry.isDirectory) {
+                    // 如果是目录，直接跳转到该目录
+                    navigateToPath(path)
+                } else {
+                    // 如果是文件，跳转到文件的上级目录
+                    val parentPath = path.substringBeforeLast(FILE_SPLIT).ifEmpty { FILE_SPLIT }
+                    navigateToPath(parentPath)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error jumping to clipboard path", e)
+                handleToast(getString("file.jumpToClipboard.invalidPath"))
+            }
+        }
+    }
+    
+    private suspend fun getFileEntry(path: String): FileListingService.FileEntry? {
+        return try {
+            val parentPath = path.substringBeforeLast(FILE_SPLIT).ifEmpty { FILE_SPLIT }
+            val fileName = path.substringAfterLast(FILE_SPLIT)
+            val children = DeviceOperate.ls(parentPath)
+            children.find { it.name == fileName }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting file entry: $path", e)
+            null
+        }
     }
 }
