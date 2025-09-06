@@ -6,7 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-group = "com.xmbet"
+group = "me.xmbet"
 version = "1.0.0"
 val appName by extra("EasyADB")
 val appVersion by extra("1.0.0")
@@ -23,15 +23,22 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
+    // 扩展图标
     implementation(compose.materialIconsExtended)
+
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:${properties["fastjson2.version"]}")
-    implementation("com.android.tools.ddms:ddmlib:${properties["ddmlib.version"]}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${properties["kotlin.version"]}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${properties["kotlin.version"]}")
+
     implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:${properties["lifecycle.viewmodel.compose.version"]}")
+    // 文件选择
     implementation("io.github.vinceglb:filekit-core:0.10.0")
     implementation("io.github.vinceglb:filekit-dialogs:0.10.0")
+    // adb封装
     implementation(project(":ddmlib"))
+    implementation("com.android.tools.ddms:ddmlib:${properties["ddmlib.version"]}")
+    // 数据持久化
+    implementation("com.russhwolf:multiplatform-settings:${properties["multiplatform.settings.version"]}")
     testImplementation(kotlin("test"))
 }
 

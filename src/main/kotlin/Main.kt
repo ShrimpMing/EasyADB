@@ -6,10 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.xmbest.Config
-import com.xmbest.model.Theme
-import com.xmbest.module.InitModule
-import com.xmbest.screen.router.RouterScreen
+import me.xmbest.Config
+import me.xmbest.model.Theme
+import me.xmbest.module.InitModule
+import me.xmbest.screen.router.RouterScreen
 
 @OptIn(InternalComposeUiApi::class)
 @Composable
