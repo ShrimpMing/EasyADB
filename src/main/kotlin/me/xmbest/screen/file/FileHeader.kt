@@ -4,6 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -155,47 +160,64 @@ private fun BreadcrumbNavigation(
     onCopyPath: (String) -> Unit,
     copyPathLabel: String
 ) {
-    val scrollState = rememberScrollState()
+    val lazyListState = rememberLazyListState()
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .weight(1f)
-                .horizontalScroll(scrollState)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier.weight(1f)
         ) {
-            pathParts.forEachIndexed { index, part ->
-                val isLast = index == pathParts.size - 1
-                val clickPath = part.second
+            LazyRow(
+                state = lazyListState,
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                itemsIndexed(pathParts) { index, part ->
+                    val isLast = index == pathParts.size - 1
+                    val clickPath = part.second
 
-                if (index > 0) {
-                    Icon(
-                        Icons.Default.ChevronRight,
-                        contentDescription = "",
-                        tint = MaterialTheme.colors.onBackground
-                    )
-                }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        if (index > 0) {
+                            Icon(
+                                Icons.Default.ChevronRight,
+                                contentDescription = "",
+                                tint = MaterialTheme.colors.onBackground
+                            )
+                        }
 
-                ContextMenuArea(
-                    items = {
-                        listOf(
-                            ContextMenuItem(copyPathLabel) {
-                                onCopyPath(clickPath)
+                        ContextMenuArea(
+                            items = {
+                                listOf(
+                                    ContextMenuItem(copyPathLabel) {
+                                        onCopyPath(clickPath)
+                                    }
+                                )
                             }
-                        )
+                        ) {
+                            PathBreadcrumb(
+                                text = part.first,
+                                isRoot = index == 0,
+                                isLast = isLast,
+                                onClick = { onNavigate(clickPath) }
+                            )
+                        }
                     }
-                ) {
-                    PathBreadcrumb(
-                        text = part.first,
-                        isRoot = index == 0,
-                        isLast = isLast,
-                        onClick = { onNavigate(clickPath) }
-                    )
                 }
             }
+            
+            HorizontalScrollbar(
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                adapter = rememberScrollbarAdapter(lazyListState)
+            )
         }
 
+        Spacer(Modifier.width(8.dp))
         JumpToPathButton(
             viewModel = viewModel
         )
