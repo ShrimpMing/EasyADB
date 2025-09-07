@@ -67,6 +67,7 @@ class FileViewModel : BaseViewModel<FileUiState>() {
                 is FileUiEvent.RenameFile -> handleRenameFile(event.oldPath, event.newName)
                 is FileUiEvent.Toast -> handleToast(event.message)
                 is FileUiEvent.JumpToClipboardPath -> handleJumpToClipboardPath()
+                is FileUiEvent.UpdateFilter -> handleUpdateFilter(event.filter)
             }
         }
 
@@ -81,16 +82,17 @@ class FileViewModel : BaseViewModel<FileUiState>() {
     }
 
     private suspend fun refreshCurrentDirectory() {
-        Log.d(TAG, "refreshCurrentDirectory path = ${uiState.value.parentPath}")
+        Log.d(TAG, "refreshCurrentDirectory path = ${uiState.value.parentPath}, filter = ${uiState.value.filterStr}")
         _uiState.value =
             _uiState.value.copy(
                 children = DeviceOperate.ls(uiState.value.parentPath)
+                    .filter { it.name.contains(uiState.value.filterStr,true) }
             )
     }
 
     private suspend fun navigateToPath(path: String) {
         Log.d(TAG, "navigateToPath path = $path")
-        _uiState.value = _uiState.value.copy(parentPath = path)
+        _uiState.value = _uiState.value.copy(parentPath = path, filterStr = "")
         refreshCurrentDirectory()
     }
 
@@ -299,31 +301,36 @@ class FileViewModel : BaseViewModel<FileUiState>() {
         _uiState.value = _uiState.value.copy(toast = message)
     }
 
+    private suspend fun handleUpdateFilter(filter: String) {
+        _uiState.value = _uiState.value.copy(filterStr = filter)
+        refreshCurrentDirectory()
+    }
+
     private suspend fun handleJumpToClipboardPath() {
         withContext(Dispatchers.IO) {
             try {
                 // 读取剪切板内容
                 val clipboardText = me.xmbest.ddmlib.ClipboardUtil.getSysClipboardText()
-                
+
                 if (clipboardText.isNullOrBlank()) {
                     handleToast(getString("file.jumpToClipboard.emptyClipboard"))
                     return@withContext
                 }
-                
+
                 // 验证路径格式（简单验证是否以/开头）
                 val path = clipboardText.trim()
                 if (!path.startsWith(FILE_SPLIT)) {
                     handleToast(getString("file.jumpToClipboard.invalidPath"))
                     return@withContext
                 }
-                
+
                 // 检查路径是否存在并获取文件信息
                 val fileEntry = getFileEntry(path)
                 if (fileEntry == null) {
                     handleToast(getString("file.jumpToClipboard.pathNotExist"))
                     return@withContext
                 }
-                
+
                 // 判断是文件还是目录，并执行相应的跳转逻辑
                 if (fileEntry.isDirectory) {
                     // 如果是目录，直接跳转到该目录
@@ -339,7 +346,7 @@ class FileViewModel : BaseViewModel<FileUiState>() {
             }
         }
     }
-    
+
     private suspend fun getFileEntry(path: String): FileListingService.FileEntry? {
         return try {
             val parentPath = path.substringBeforeLast(FILE_SPLIT).ifEmpty { FILE_SPLIT }

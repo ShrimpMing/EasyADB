@@ -17,4 +17,5 @@ sealed class FileUiEvent(val path: String) {
     data class RenameFile(val oldPath: String, val newName: String) : FileUiEvent("")
     class Toast(val message: String) : FileUiEvent("")
     object JumpToClipboardPath : FileUiEvent("")
+    data class UpdateFilter(val filter: String) : FileUiEvent("")
 }

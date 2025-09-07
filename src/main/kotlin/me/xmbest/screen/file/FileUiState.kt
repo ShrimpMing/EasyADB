@@ -8,4 +8,5 @@ data class FileUiState(
     val isDragging: Boolean = false,  // 是否处于拖拽状态
     val uploadTipText: String = "", // 上传提示文本
     val toast: String = "",
+    val filterStr: String = ""
 )
