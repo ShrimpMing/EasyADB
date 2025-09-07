@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +37,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
     val uiState = viewModel.uiState.collectAsState().value
     val dialogState = LocalDialogState.current
 
+    LaunchedEffect(uiState.customerAdbPath) {
+        if (uiState.customerAdbPath != Environment.Custom.path) {
+            viewModel.onEvent(SettingsUiEvent.UpdateAdbEnv(Environment.Custom))
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         ThemeSettingsSection(
             title = viewModel.getString("theme.setting"),
@@ -53,7 +60,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             onCustomerChange = { viewModel.onEvent(SettingsUiEvent.UpdateCustomerAdb) }
         )
 
-        LabeledSection(viewModel.getString("settings.other"), modifier = Modifier.fillMaxWidth().padding(start = 6.dp, top = 6.dp)) {
+        LabeledSection(
+            viewModel.getString("settings.other"),
+            modifier = Modifier.fillMaxWidth().padding(start = 6.dp, top = 6.dp)
+        ) {
             Button(
                 onClick = {
                     DialogUtil.showWarning(
