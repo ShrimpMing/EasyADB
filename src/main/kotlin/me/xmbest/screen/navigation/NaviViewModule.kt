@@ -1,4 +1,4 @@
-package me.xmbest.screen.router
+package me.xmbest.screen.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class RouterViewModule() : BaseViewModel<RouterUiState>() {
+class NaviViewModule() : BaseViewModel<NaviUiState>() {
     val pageList = listOf(
         Page(
             getString("router.item.fileManagement"),
@@ -29,7 +29,7 @@ class RouterViewModule() : BaseViewModel<RouterUiState>() {
         ) { SettingsScreen() }
     )
 
-    override val _uiState = MutableStateFlow(RouterUiState())
+    override val _uiState = MutableStateFlow(NaviUiState())
 
     init {
         viewModelScope.launch(Dispatchers.Default) {
@@ -45,12 +45,12 @@ class RouterViewModule() : BaseViewModel<RouterUiState>() {
         }
     }
 
-    fun onEvent(event: RouterUiEvent) {
+    fun onEvent(event: NaviUiEvent) {
         when (event) {
-            is RouterUiEvent.SelectLeftItem -> selectLeftItem(event.index)
-            is RouterUiEvent.SelectDevice -> selectDevice(event.device)
-            is RouterUiEvent.ShowDeviceList -> showDeviceList(event.show)
-            is RouterUiEvent.RefreshDevice -> refreshDevice()
+            is NaviUiEvent.SelectLeftItem -> selectLeftItem(event.index)
+            is NaviUiEvent.SelectDevice -> selectDevice(event.device)
+            is NaviUiEvent.ShowDeviceList -> showDeviceList(event.show)
+            is NaviUiEvent.RefreshDevice -> refreshDevice()
         }
     }
 

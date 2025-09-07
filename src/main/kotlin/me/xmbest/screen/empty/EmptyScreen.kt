@@ -19,11 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.xmbest.screen.router.RouterUiEvent
-import me.xmbest.screen.router.RouterViewModule
+import me.xmbest.screen.navigation.NaviUiEvent
+import me.xmbest.screen.navigation.NaviViewModule
 
 @Composable
-fun EmptyScreen(viewModel: RouterViewModule = viewModel()) {
+fun EmptyScreen(viewModel: NaviViewModule = viewModel()) {
 
     Box(
         modifier = Modifier
@@ -79,7 +79,7 @@ fun EmptyScreen(viewModel: RouterViewModule = viewModel()) {
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colors.primary)
                     .clickable {
-                        viewModel.onEvent(RouterUiEvent.RefreshDevice)
+                        viewModel.onEvent(NaviUiEvent.RefreshDevice)
                     }
                     .padding(horizontal = 24.dp, vertical = 12.dp)
             ) {

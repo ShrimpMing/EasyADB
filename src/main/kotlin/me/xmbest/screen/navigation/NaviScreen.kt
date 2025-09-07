@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package me.xmbest.screen.router
+package me.xmbest.screen.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.EaseInCubic
@@ -31,7 +31,7 @@ import me.xmbest.model.DialogState
 
 
 @Composable
-fun RouterScreen(viewModel: RouterViewModule = viewModel()) {
+fun NaviScreen(viewModel: NaviViewModule = viewModel()) {
     val uiState = viewModel.uiState.collectAsState().value
     val snackbarHostState = remember { SnackbarHostState() }
     val dialogState = remember { mutableStateOf(DialogState()) }
@@ -57,7 +57,7 @@ fun RouterScreen(viewModel: RouterViewModule = viewModel()) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Left(
-    modifier: Modifier = Modifier, uiState: RouterUiState, viewModel: RouterViewModule = viewModel()
+    modifier: Modifier = Modifier, uiState: NaviUiState, viewModel: NaviViewModule = viewModel()
 ) {
     Column(
         modifier.background(MaterialTheme.colors.background).padding(start = 12.dp, end = 12.dp)
@@ -69,7 +69,7 @@ fun Left(
                     if (index == uiState.index) MaterialTheme.colors.primary
                     else MaterialTheme.colors.background
                 ).clickable {
-                    viewModel.onEvent(RouterUiEvent.SelectLeftItem(index))
+                    viewModel.onEvent(NaviUiEvent.SelectLeftItem(index))
                 }, icon = {
                     Icon(
                         item.icon, item.icon.name, tint = optionColor(index == uiState.index)
@@ -84,14 +84,14 @@ fun Left(
             modifier = Modifier.weight(1f).padding(bottom = 8.dp).fillMaxWidth(), verticalAlignment = Alignment.Bottom
         ) {
             ListItem(modifier = Modifier.height(44.dp).clip(RoundedCornerShape(8.dp)).clickable {
-                viewModel.onEvent(RouterUiEvent.ShowDeviceList(true))
+                viewModel.onEvent(NaviUiEvent.ShowDeviceList(true))
             }, icon = {
                 Icon(
                     Icons.Default.Phonelink,
                     contentDescription = "refresh devices",
                     tint = MaterialTheme.colors.onBackground,
                     modifier = Modifier.clickable {
-                        viewModel.onEvent(RouterUiEvent.RefreshDevice)
+                        viewModel.onEvent(NaviUiEvent.RefreshDevice)
                     })
             }) {
                 Text(
@@ -104,7 +104,7 @@ fun Left(
 
         DropdownMenu(
             expanded = uiState.devicesListShow, onDismissRequest = {
-                viewModel.onEvent(RouterUiEvent.ShowDeviceList(!uiState.devicesListShow))
+                viewModel.onEvent(NaviUiEvent.ShowDeviceList(!uiState.devicesListShow))
             }, modifier = Modifier.width(216.dp)
         ) {
             if (uiState.devices.isEmpty()) {
@@ -114,7 +114,7 @@ fun Left(
             } else {
                 uiState.devices.forEach {
                     DropdownMenuItem(onClick = {
-                        viewModel.onEvent(RouterUiEvent.SelectDevice(it))
+                        viewModel.onEvent(NaviUiEvent.SelectDevice(it))
                     }) {
                         Text(text = it.serialNumber)
                     }
@@ -126,7 +126,7 @@ fun Left(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun Right(modifier: Modifier, uiState: RouterUiState, viewModel: RouterViewModule = viewModel()) {
+fun Right(modifier: Modifier, uiState: NaviUiState, viewModel: NaviViewModule = viewModel()) {
     Column(modifier.background(color = MaterialTheme.colors.secondary)) {
         AnimatedContent(
             targetState = uiState.index,

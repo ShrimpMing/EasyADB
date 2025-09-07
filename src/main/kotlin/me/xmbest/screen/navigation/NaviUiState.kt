@@ -1,8 +1,8 @@
-package me.xmbest.screen.router
+package me.xmbest.screen.navigation
 
 import com.android.ddmlib.IDevice
 
-data class RouterUiState(
+data class NaviUiState(
     /**
      * 当前选择item
      */

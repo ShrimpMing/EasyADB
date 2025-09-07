@@ -12,7 +12,15 @@ import me.xmbest.locale.PropertiesLocalization
 import me.xmbest.model.Environment
 import me.xmbest.model.Theme
 import me.xmbest.theme.blue
+import me.xmbest.theme.brown
+import me.xmbest.theme.cyan
+import me.xmbest.theme.gray
+import me.xmbest.theme.green
+import me.xmbest.theme.orange
+import me.xmbest.theme.pink
 import me.xmbest.theme.purple
+import me.xmbest.theme.red
+import me.xmbest.theme.yellow
 import me.xmbest.util.PreferencesUtil
 import me.xmbest.util.PreferencesUtil.PREFERENCES_THEME
 import java.util.*
@@ -29,8 +37,16 @@ object Config {
         Theme.System,
         Theme.Light,
         Theme.Night,
+        Theme.Other(strings.get("theme.red"), red),
+        Theme.Other(strings.get("theme.orange"), orange),
+        Theme.Other(strings.get("theme.yellow"), yellow),
+        Theme.Other(strings.get("theme.green"), green),
+        Theme.Other(strings.get("theme.cyan"), cyan),
         Theme.Other(strings.get("theme.blue"), blue),
-        Theme.Other(strings.get("theme.purple"), purple)
+        Theme.Other(strings.get("theme.purple"), purple),
+        Theme.Other(strings.get("theme.pink"), pink),
+        Theme.Other(strings.get("theme.brown"), brown),
+        Theme.Other(strings.get("theme.gray"), gray)
     )
 
     val envList = listOf(

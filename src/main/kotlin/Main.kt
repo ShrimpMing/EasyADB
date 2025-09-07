@@ -9,7 +9,7 @@ import androidx.compose.ui.window.application
 import me.xmbest.Config
 import me.xmbest.model.Theme
 import me.xmbest.module.InitModule
-import me.xmbest.screen.router.RouterScreen
+import me.xmbest.screen.navigation.NaviScreen
 
 @OptIn(InternalComposeUiApi::class)
 @Composable
@@ -25,7 +25,7 @@ fun App() {
             else
                 Config.theme.value.color
     ) {
-        RouterScreen()
+        NaviScreen()
     }
 }
 
