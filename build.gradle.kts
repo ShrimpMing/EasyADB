@@ -37,6 +37,7 @@ dependencies {
     // adb封装
     implementation(project(":ddmlib"))
     implementation("com.android.tools.ddms:ddmlib:${properties["ddmlib.version"]}")
+    implementation("com.android.tools:common:${properties["ddmlib.version"]}")
     // 数据持久化
     implementation("com.russhwolf:multiplatform-settings:${properties["multiplatform.settings.version"]}")
     testImplementation(kotlin("test"))

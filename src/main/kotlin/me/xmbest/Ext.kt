@@ -1,6 +1,7 @@
 package me.xmbest
 
 import androidx.compose.material.SnackbarHostState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.staticCompositionLocalOf
 import me.xmbest.model.DialogState
 import me.xmbest.util.PreferencesUtil
@@ -47,6 +48,6 @@ val LocalSnackbarHostState = staticCompositionLocalOf<SnackbarHostState> {
 }
 
 // 添加全局弹窗状态
-val LocalDialogState = staticCompositionLocalOf<androidx.compose.runtime.MutableState<DialogState>> {
+val LocalDialogState = staticCompositionLocalOf<MutableState<DialogState>> {
     error("No DialogState provided")
 }

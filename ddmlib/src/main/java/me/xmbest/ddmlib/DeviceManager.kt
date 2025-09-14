@@ -92,7 +92,7 @@ object DeviceManager {
             val bridge = AndroidDebugBridge.getBridge()
             Log.d(TAG, "isConnected = ${bridge?.isConnected},size = ${bridge?.devices?.size}")
             if (bridge?.isConnected == true) {
-                _devices.update { bridge.devices.toList() }
+                _devices.update { bridge.devices.filter { it.state == IDevice.DeviceState.ONLINE }.toList() }
             } else {
                 _devices.update { emptyList() }
             }

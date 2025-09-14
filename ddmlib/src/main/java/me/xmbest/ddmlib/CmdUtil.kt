@@ -14,7 +14,7 @@ object CmdUtil {
      */
     fun run(command: String): Process {
         require(command.isNotBlank()) { "Command must not be blank." }
-        _root_ide_package_.me.xmbest.ddmlib.Log.d(TAG, "run $command")
+        Log.d(TAG, "run $command")
         val commands = command.split(" ").filter { it.isNotBlank() }
         val builder = ProcessBuilder(commands)
         builder.directory(File(System.getProperty("user.dir")))

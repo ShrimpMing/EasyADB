@@ -2,21 +2,29 @@ package me.xmbest.screen.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Hive
 import androidx.compose.material.icons.filled.Settings
 import androidx.lifecycle.viewModelScope
 import com.android.ddmlib.IDevice
-import me.xmbest.base.BaseViewModel
-import me.xmbest.ddmlib.DeviceManager
-import me.xmbest.model.Page
-import me.xmbest.screen.file.FileScreen
-import me.xmbest.screen.settings.SettingsScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import me.xmbest.base.BaseViewModel
+import me.xmbest.ddmlib.DeviceManager
+import me.xmbest.model.Page
+import me.xmbest.screen.file.FileScreen
+import me.xmbest.screen.home.HomeScreen
+import me.xmbest.screen.settings.SettingsScreen
 
 class NaviViewModule() : BaseViewModel<NaviUiState>() {
     val pageList = listOf(
+        Page(
+            name = getString("router.item.commonFeatures"),
+            Icons.Default.Hive
+        ) {
+            HomeScreen()
+        },
         Page(
             getString("router.item.fileManagement"),
             Icons.Default.Folder

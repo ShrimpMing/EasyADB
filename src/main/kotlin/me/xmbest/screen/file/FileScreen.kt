@@ -93,9 +93,7 @@ private fun FileScreenContent(viewModel: FileViewModel) {
             .dragAndDropTarget(
                 shouldStartDragAndDrop = ::shouldStartDragAndDrop, target = rememberDragAndDropTarget(viewModel)
             )
-            .onKeyEvent(
-                { setKeyEvent(viewModel, uiState, it) }
-            )
+            .onKeyEvent { setKeyEvent(viewModel, uiState, it) }
             .focusRequester(requester).focusable()
     ) {
         FileList(

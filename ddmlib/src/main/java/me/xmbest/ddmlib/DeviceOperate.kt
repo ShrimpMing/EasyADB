@@ -53,7 +53,7 @@ object DeviceOperate {
      * @param end 目标路径
      */
     fun mv(start: String, end: String) {
-        device?.let { device ->
+        device?.let { _ ->
             shell("mv $start $end")
         }
     }
@@ -236,10 +236,12 @@ object DeviceOperate {
 
     suspend fun shell(command: String, timeMillis: Long) = suspendCoroutine {
         coroutineScope.launch {
+            var resume = false
             device?.executeShellCommand(command, object : MultiLineReceiver() {
                 override fun processNewLines(lines: Array<out String>?) {
-                    if (lines?.isNotEmpty() == true && isActive) {
+                    if (lines?.isNotEmpty() == true && isActive && !resume) {
                         val str = lines.filter { line -> line.isNotEmpty() }.joinToString("\n")
+                        resume = true
                         it.resume(str)
                     }
                 }
@@ -247,7 +249,10 @@ object DeviceOperate {
                 override fun isCancelled() = false
             })
             delay(timeMillis)
-            it.resume("")
+            if (isActive && !resume) {
+                resume = true
+                it.resume("")
+            }
         }
     }
 }
