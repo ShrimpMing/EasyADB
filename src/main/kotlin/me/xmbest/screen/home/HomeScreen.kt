@@ -2,8 +2,10 @@ package me.xmbest.screen.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -11,10 +13,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -26,15 +28,101 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.ddmlib.IDevice
+import me.xmbest.component.Item
 import me.xmbest.ddmlib.*
 import me.xmbest.theme.CardShape
 
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    val scrollState = rememberScrollState()
+    Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
         val uiState = viewModel.uiState.collectAsState().value
         FirstRow(viewModel, uiState)
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(10.dp).clip(CardShape)
+                    .background(MaterialTheme.colors.surface).padding(10.dp)
+            ) {
+                Text(
+                    text = viewModel.getString("router.item.commonFeatures"),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colors.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+
+                    Item(
+                        icon = Icons.Default.Search,
+                        "当前Activity"
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.FindCurrentActivity)
+                    }
+
+                    Item(
+                        Icons.Default.Replay,
+                        "重启",
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.Reboot)
+                    }
+
+                    Item(
+                        Icons.Default.FilterCenterFocus,
+                        "屏幕截图",
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.ScreenShot)
+                    }
+
+
+                    Item(
+                        icon = Icons.Outlined.BugReport,
+                        "无线ADB"
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.OpenWifiAdb)
+                    }
+
+                    Item(
+                        Icons.Outlined.Settings,
+                        "原生设置",
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.OpenSettings)
+                    }
+
+                    Item(
+                        Icons.Outlined.DeleteSweep,
+                        "清理logcat",
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.ClearLogcat)
+                    }
+
+                    Item(
+                        Icons.Default.KeyboardDoubleArrowDown,
+                        "显示状态栏",
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.ShowStatusbar)
+                    }
+
+                    Item(
+                        Icons.Default.KeyboardDoubleArrowUp,
+                        "隐藏状态栏",
+                    ) {
+                        viewModel.onEvent(HomeUiEvent.HideStatusbar)
+                    }
+
+                    uiState.keyEventList.forEach {
+                        Item(
+                            icon = it.second, it.first, click = {
+                                viewModel.onEvent(HomeUiEvent.InputKey(it.third))
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -47,7 +135,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
 private fun DeviceInfoItem(
     label: String, value: String
 ) {
-    SelectionContainer{
+    SelectionContainer {
         Text(
             text = "$label: $value", fontSize = 14.sp, color = MaterialTheme.colors.onSurface
         )
@@ -71,7 +159,7 @@ private fun DeviceInfoCard(
     memory: String?
 ) {
     Column(
-        modifier = Modifier.padding(10.dp).clip(CardShape).widthIn(min = 500.dp).heightIn(min = 224.dp)
+        modifier = Modifier.padding(10.dp).clip(CardShape).widthIn(min = 440.dp).heightIn(min = 224.dp)
             .background(MaterialTheme.colors.surface).padding(10.dp)
     ) {
         Text(
@@ -169,6 +257,13 @@ private fun DeviceVersionDisplay(
                 fontSize = 14.sp,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f),
                 modifier = Modifier.align(Alignment.Center).rotate(45F)
+            )
+
+            Text(
+                text = device?.batteryLevel?.toString()?.plus("%") ?: "",
+                fontSize = 14.sp,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f),
+                modifier = Modifier.align(Alignment.BottomCenter).rotate(45F)
             )
 
             if (device?.version?.isPreview == true) {

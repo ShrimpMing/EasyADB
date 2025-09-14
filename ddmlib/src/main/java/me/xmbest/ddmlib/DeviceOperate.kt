@@ -206,6 +206,15 @@ object DeviceOperate {
         return image
     }
 
+    suspend fun findCurrentActivity(): String {
+        val shell = shell("dumpsys window | grep mCurrentFocus", 200)
+        val regex = Regex(pattern = """\s\S+/\S+}""")
+        val res = regex.find(shell)?.value?.replace("}", "")?.trim() ?: ""
+        //复制到剪切板
+        ClipboardUtil.setSysClipboardText(res)
+        return res
+    }
+
     /**
      * 查找当前文件列表
      */
@@ -231,6 +240,27 @@ object DeviceOperate {
                 })
         }
     }
+
+    /**
+     * 控制状态栏
+     * @param show 显示、隐藏
+     */
+    fun controlStatusbar(show: Boolean) {
+        shell("service call statusbar ${if (show) 1 else 2}")
+    }
+
+    fun openSettings() {
+        shell("am start  -n com.android.settings/com.android.settings.Settings")
+    }
+
+    fun tcpip(port: Int = 5555) {
+        CmdUtil.run("${DeviceManager.adbPath.value} -s ${device?.serialNumber} tcpip $port")
+    }
+
+    /**
+     * 清理logcat缓存
+     */
+    fun logcatC() = shell("logcat -c")
 
     fun shell(command: String) = device?.executeShellCommand(command, EmptyReceiver())
 
