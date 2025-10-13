@@ -6,7 +6,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,10 +29,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,13 +53,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.xmbest.LocalDialogState
-import me.xmbest.ddmlib.*
+import me.xmbest.ddmlib.AppInfo
+import me.xmbest.ddmlib.ClipboardUtil
+import me.xmbest.ddmlib.DeviceOperate
+import me.xmbest.ddmlib.Log
+import me.xmbest.ddmlib.ProcessInfo
+import me.xmbest.ddmlib.loadInfo
 import me.xmbest.theme.CardShape
 import me.xmbest.theme.blue_primary
 import me.xmbest.theme.green_primary
 import me.xmbest.theme.yellow_primary
 import me.xmbest.util.DialogUtil
-import java.util.Locale.getDefault
 
 @Composable
 fun AppScreen(viewModel: AppViewModel = viewModel()) {
@@ -230,17 +254,17 @@ fun Header(uiState: AppUiState, viewModel: AppViewModel = viewModel()) {
         horizontalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         if (uiState.mode == AppShowMode.ProcessMode) {
-            DeviceOperate.topColumns.subList(0, DeviceOperate.topColumns.size - 1).forEach { item ->
+            DeviceOperate.topHeadColumns.forEach { item ->
                 Text(
-                    text = item.uppercase(getDefault()),
+                    text = item,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
                 )
             }
             Text(
-                DeviceOperate.topColumns.last().uppercase(getDefault()),
+                "name",
                 textAlign = TextAlign.Center,
-                modifier = Modifier.weight(6f).align(Alignment.CenterVertically)
+                modifier = Modifier.weight(5f).align(Alignment.CenterVertically)
             )
             Row(Modifier.weight(1.5f)) {
                 Text("action", textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.CenterVertically))
@@ -303,7 +327,7 @@ fun ProcessItem(process: ProcessInfo, viewModel: AppViewModel = viewModel()) {
                 Text(text = item, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.CenterVertically))
             }
         }
-        SelectionContainer(Modifier.weight(4f)) {
+        SelectionContainer(Modifier.weight(5f)) {
             Text(process.name, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.CenterVertically))
         }
 

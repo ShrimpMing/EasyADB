@@ -25,7 +25,8 @@ object DeviceOperate {
     /**
      * top命令查询的字段
      */
-    val topColumns = listOf("pid", "user", "%cpu", "time+", "%mem", "virt", "res", "shr", "name")
+    private val topColumns = listOf("pid", "user", "%cpu", "time+", "%mem", "virt", "res", "shr", "name")
+    val topHeadColumns = listOf("pid", "user", "cpu", "time", "mem", "virt", "res", "shr")
 
     fun root(): Boolean {
         Log.i(TAG, "adb root")
