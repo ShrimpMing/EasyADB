@@ -1,6 +1,5 @@
 package me.xmbest.module
 
-import androidx.compose.ui.res.useResource
 import io.github.vinceglb.filekit.FileKit
 import me.xmbest.adb
 import me.xmbest.appStorageAbsolutePath
@@ -25,7 +24,7 @@ object InitModule {
         FileKit.init("EasyADB")
     }
 
-    fun writeFile() {
+    private fun writeFile() {
         val parentFile = File(path)
         if (!parentFile.exists()) {
             parentFile.mkdirs()
@@ -37,19 +36,19 @@ object InitModule {
             if (!file.exists()) {
                 file.createNewFile()
                 file.setExecutable(true)
-                useResource(it.first + "/" + fileName) { input ->
+                this::class.java.classLoader.getResourceAsStream("${it.first}/$fileName")?.use { input ->
                     input.copyTo(file.outputStream())
                 }
             }
         }
     }
 
-    fun initAdb() {
+    private fun initAdb() {
         val savedAdbPath = PreferencesUtil.get(PREFERENCES_ADB_PATH, Environment.Program.path)
         DeviceManager.initialize(savedAdbPath)
     }
 
-    fun loadConfig() {
+    private fun loadConfig() {
 
     }
 }

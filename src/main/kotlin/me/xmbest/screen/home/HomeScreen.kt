@@ -1,7 +1,19 @@
 package me.xmbest.screen.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -30,7 +42,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.ddmlib.IDevice
 import me.xmbest.LocalDialogState
 import me.xmbest.component.Item
-import me.xmbest.ddmlib.*
+import me.xmbest.ddmlib.androidVersion
+import me.xmbest.ddmlib.buildDate
+import me.xmbest.ddmlib.buildType
+import me.xmbest.ddmlib.productBrand
+import me.xmbest.ddmlib.productName
+import me.xmbest.ddmlib.socModel
 import me.xmbest.theme.CardShape
 import me.xmbest.util.DialogUtil
 
@@ -128,11 +145,13 @@ private fun DeviceInfoCard(
 /**
  * 设备版本显示
  * @param device 设备信息
+ * @param batteryLevel 电池电量
  */
 @Composable
 private fun DeviceVersionDisplay(
     viewModel: HomeViewModel,
     device: IDevice?,
+    batteryLevel: String?,
     modifier: Modifier,
 ) {
     Column(
@@ -179,7 +198,7 @@ private fun DeviceVersionDisplay(
             )
 
             Text(
-                text = device?.batteryLevel?.toString()?.plus("%") ?: "",
+                text = batteryLevel?.plus("%") ?: "",
                 fontSize = 14.sp,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f),
                 modifier = Modifier.align(Alignment.BottomCenter).rotate(45F)
@@ -283,6 +302,7 @@ fun FirstRow(viewModel: HomeViewModel, uiState: HomeUiState) {
         DeviceVersionDisplay(
             viewModel = viewModel,
             device = uiState.device,
+            batteryLevel = uiState.batteryLevel,
             modifier = Modifier
                 .padding(end = 16.dp)
                 .rotate(-45F)

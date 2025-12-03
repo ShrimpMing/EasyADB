@@ -15,7 +15,7 @@ import me.xmbest.base.BaseViewModel
 import me.xmbest.ddmlib.*
 import me.xmbest.ddmlib.DeviceOperate.findCurrentActivity
 
-class HomeViewModel() : BaseViewModel<HomeUiState>() {
+class HomeViewModel : BaseViewModel<HomeUiState>() {
 
     companion object {
         private const val TAG = "HomeViewModel"
@@ -90,6 +90,7 @@ class HomeViewModel() : BaseViewModel<HomeUiState>() {
                         ipAddress = ipAddress(),
                         memory = memorySize(),
                         cpuCoreSize = cpuCoreSize(),
+                        batteryLevel = batteryLevel().replace("\nlevel:",""),
                     )
                 }.onFailure {
                     Log.e(TAG, "onFailure!", it)
