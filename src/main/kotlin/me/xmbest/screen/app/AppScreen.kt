@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
@@ -180,25 +181,38 @@ fun AppItem(appInfo: AppInfo, viewModel: AppViewModel = viewModel()) {
             if (isHovered) {
                 IconButton(onClick = {
                     ClipboardUtil.setSysClipboardText(appInfo.path)
-                }) {
+                }, modifier = Modifier.width(32.dp)) {
                     TooltipArea({ Text(viewModel.getString("file.copyPath")) }) {
                         Icon(
                             imageVector = Icons.Outlined.ContentCopy,
                             contentDescription = "",
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(18.dp),
                             tint = blue_primary
                         )
                     }
                 }
                 IconButton(onClick = {
                     viewModel.onEvent(AppUiEvent.StartApp(appInfo.packageName))
-                }) {
+                }, modifier = Modifier.width(32.dp)) {
                     TooltipArea({ Text(viewModel.getString("app.startApp")) }) {
                         Icon(
                             imageVector = Icons.Outlined.PlayArrow,
                             contentDescription = "",
-                            modifier = Modifier.size(28.dp),
+                            modifier = Modifier.size(24.dp),
                             tint = green_primary
+                        )
+                    }
+                }
+
+                IconButton(onClick = {
+                    viewModel.onEvent(AppUiEvent.ForceStop(appInfo.packageName))
+                }, modifier = Modifier.width(32.dp)) {
+                    TooltipArea({ Text(viewModel.getString("app.forceStop")) }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "",
+                            modifier = Modifier.size(20.dp),
+                            tint = yellow_primary
                         )
                     }
                 }
@@ -212,13 +226,13 @@ fun AppItem(appInfo: AppInfo, viewModel: AppViewModel = viewModel()) {
                         },
                         onCancel = {}
                     )
-                }) {
+                }, modifier = Modifier.width(32.dp)) {
                     TooltipArea({ Text(viewModel.getString("settings.clearData")) }) {
                         Icon(
-                            imageVector = Icons.Outlined.Close,
+                            imageVector = Icons.Outlined.CleaningServices,
                             contentDescription = "",
-                            modifier = Modifier.size(20.dp),
-                            tint = yellow_primary
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colors.error
                         )
                     }
                 }
@@ -232,12 +246,12 @@ fun AppItem(appInfo: AppInfo, viewModel: AppViewModel = viewModel()) {
                         },
                         onCancel = {}
                     )
-                }) {
+                }, modifier = Modifier.width(32.dp)) {
                     TooltipArea({ Text(viewModel.getString("app.uninstall")) }) {
                         Icon(
                             imageVector = Icons.Outlined.DeleteOutline,
                             contentDescription = "",
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colors.error
                         )
                     }
