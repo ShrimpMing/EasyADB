@@ -199,7 +199,7 @@ class CustomerViewModel : BaseViewModel<CustomerUiState>() {
         }
     }
 
-    private fun handleUpdateInputValue(uuid: String, value: String) {
+    private fun handleUpdateInputValue(uuid: String?, value: String) {
 
     }
 
