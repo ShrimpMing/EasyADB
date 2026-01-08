@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -33,10 +35,16 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.xmbest.Config
@@ -45,11 +53,17 @@ import me.xmbest.locale.PropertiesLocalization
 import me.xmbest.model.Environment
 import me.xmbest.model.Theme
 import me.xmbest.util.DialogUtil
+import kotlin.math.roundToInt
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
     val uiState = viewModel.uiState.collectAsState().value
     val dialogState = LocalDialogState.current
+    val windowState = Config.windowState.collectAsState().value
+    var windowMode by remember { mutableStateOf(Config.getWindowSizeMode()) }
+    val savedCustomWindowSize = Config.getCustomWindowSizeDp()
+    var customWidth by remember { mutableStateOf(savedCustomWindowSize.width.value.roundToInt().toString()) }
+    var customHeight by remember { mutableStateOf(savedCustomWindowSize.height.value.roundToInt().toString()) }
 
     LaunchedEffect(uiState.customerAdbPath) {
         if (uiState.customerAdbPath != Environment.Custom.path) {
@@ -72,6 +86,55 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             customerPath = uiState.customerAdbPath,
             onEnvSelected = { viewModel.onEvent(SettingsUiEvent.UpdateAdbEnv(it)) },
             onCustomerChange = { viewModel.onEvent(SettingsUiEvent.UpdateCustomerAdb) }
+        )
+
+        WindowSizeSection(
+            title = viewModel.getString("settings.window.size"),
+            followLabel = viewModel.getString("settings.window.mode.follow"),
+            rememberLabel = viewModel.getString("settings.window.mode.remember"),
+            customLabel = viewModel.getString("settings.window.mode.custom"),
+            widthLabel = viewModel.getString("settings.window.width"),
+            heightLabel = viewModel.getString("settings.window.height"),
+            applyLabel = viewModel.getString("settings.window.apply"),
+            mode = windowMode,
+            customWidth = customWidth,
+            customHeight = customHeight,
+            onModeChange = { mode ->
+                windowMode = mode
+                Config.setWindowSizeMode(mode)
+                when (mode) {
+                    Config.WindowSizeMode.Follow -> {
+                        Config.updateWindowSize(Config.defaultWindowSizeDp)
+                    }
+                    Config.WindowSizeMode.Remember -> {
+                        Config.saveRememberWindowSizeDp(windowState.size)
+                    }
+                    Config.WindowSizeMode.Custom -> {
+                        val width = customWidth.toIntOrNull()
+                        val height = customHeight.toIntOrNull()
+                        if (width != null && width > 0 && height != null && height > 0) {
+                            val sizeDp = DpSize(width.dp, height.dp)
+                            Config.saveCustomWindowSizeDp(sizeDp)
+                            Config.updateWindowSize(sizeDp)
+                        }
+                    }
+                }
+            },
+            onCustomWidthChange = { value ->
+                customWidth = value.filter { it.isDigit() }
+            },
+            onCustomHeightChange = { value ->
+                customHeight = value.filter { it.isDigit() }
+            },
+            onApplyCustom = {
+                val width = customWidth.toIntOrNull()
+                val height = customHeight.toIntOrNull()
+                if (width != null && width > 0 && height != null && height > 0) {
+                    val sizeDp = DpSize(width.dp, height.dp)
+                    Config.saveCustomWindowSizeDp(sizeDp)
+                    Config.updateWindowSize(sizeDp)
+                }
+            }
         )
 
         LabeledSection(
@@ -98,6 +161,90 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 ),
             ) {
                 Text(text = viewModel.getString("settings.clearData"), color = MaterialTheme.colors.onError)
+            }
+        }
+    }
+}
+
+@Composable
+private fun WindowSizeSection(
+    title: String,
+    followLabel: String,
+    rememberLabel: String,
+    customLabel: String,
+    widthLabel: String,
+    heightLabel: String,
+    applyLabel: String,
+    mode: Config.WindowSizeMode,
+    customWidth: String,
+    customHeight: String,
+    onModeChange: (Config.WindowSizeMode) -> Unit,
+    onCustomWidthChange: (String) -> Unit,
+    onCustomHeightChange: (String) -> Unit,
+    onApplyCustom: () -> Unit
+) {
+    LabeledSection(
+        title = title,
+        modifier = Modifier.fillMaxWidth().padding(start = 6.dp, top = 6.dp)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SingleChoiceSegmentedButtonRow {
+                val modes = listOf(
+                    Config.WindowSizeMode.Follow to followLabel,
+                    Config.WindowSizeMode.Remember to rememberLabel,
+                    Config.WindowSizeMode.Custom to customLabel
+                )
+                modes.forEachIndexed { index, (value, label) ->
+                    SegmentedButton(
+                        selected = mode == value,
+                        onClick = { onModeChange(value) },
+                        label = {
+                            Text(
+                                text = label,
+                                color = if (mode == value)
+                                    MaterialTheme.colors.onPrimary
+                                else
+                                    MaterialTheme.colors.onSurface
+                            )
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = modes.size
+                        ),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = MaterialTheme.colors.primary,
+                            activeContentColor = MaterialTheme.colors.onPrimary,
+                            inactiveContainerColor = MaterialTheme.colors.surface,
+                            inactiveContentColor = MaterialTheme.colors.onSurface,
+                        )
+                    )
+                }
+            }
+
+            if (mode == Config.WindowSizeMode.Custom) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    TextField(
+                        customWidth,
+                        onValueChange = onCustomWidthChange,
+                        modifier = Modifier.defaultMinSize(minWidth = 120.dp),
+                        singleLine = true,
+                        label = { Text(widthLabel) },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    )
+                    TextField(
+                        customHeight,
+                        onValueChange = onCustomHeightChange,
+                        modifier = Modifier.defaultMinSize(minWidth = 120.dp),
+                        singleLine = true,
+                        label = { Text(heightLabel) },
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    )
+                    val canApply = customWidth.toIntOrNull()?.let { it > 0 } == true &&
+                        customHeight.toIntOrNull()?.let { it > 0 } == true
+                    Button(onClick = onApplyCustom, enabled = canApply) {
+                        Text(applyLabel)
+                    }
+                }
             }
         }
     }
@@ -265,4 +412,3 @@ private fun AdbEnvironmentSelector(
         }
     }
 }
-

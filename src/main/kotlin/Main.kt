@@ -2,23 +2,22 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.InternalComposeUiApi
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import kotlinx.coroutines.flow.distinctUntilChanged
 import me.xmbest.Config
 import me.xmbest.model.Theme
 import me.xmbest.module.InitModule
 import me.xmbest.screen.navigation.NaviScreen
 
-@OptIn(InternalComposeUiApi::class)
 @Composable
 @Preview
 fun App() {
-
     val theme = Config.theme.collectAsState().value
-
     MaterialTheme(
         colors =
             if (theme == Theme.System)
@@ -34,6 +33,16 @@ fun main() = application {
     InitModule.init()
     val windowState = Config.windowState.collectAsState()
     Window(title = "EasyADB", onCloseRequest = ::exitApplication, state = windowState.value, icon = painterResource("icon/logo.ico")) {
+        LaunchedEffect(Unit) {
+            snapshotFlow { windowState.value.size }
+                .distinctUntilChanged()
+                .collect { sizeDp ->
+                    println("width: ${sizeDp.width.value},height: ${sizeDp.height.value}")
+                    if (Config.getWindowSizeMode() == Config.WindowSizeMode.Remember) {
+                        Config.saveRememberWindowSizeDp(sizeDp)
+                    }
+                }
+        }
         App()
     }
 }

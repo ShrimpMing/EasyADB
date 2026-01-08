@@ -23,6 +23,23 @@ object PreferencesUtil {
     const val PREFERENCES_THEME = "settings.theme"
 
     /**
+     * 窗口大小模式
+     */
+    const val PREFERENCES_WINDOW_SIZE_MODE = "settings.window_size.mode"
+
+    /**
+     * 自定义窗口宽高（dp）
+     */
+    const val PREFERENCES_WINDOW_WIDTH_DP = "settings.window_size.width_dp"
+    const val PREFERENCES_WINDOW_HEIGHT_DP = "settings.window_size.height_dp"
+
+    /**
+     * 记住窗口宽高（dp）
+     */
+    const val PREFERENCES_WINDOW_REMEMBER_WIDTH_DP = "settings.window_size.remember_width_dp"
+    const val PREFERENCES_WINDOW_REMEMBER_HEIGHT_DP = "settings.window_size.remember_height_dp"
+
+    /**
      * 应用管理页面的过滤器
      */
     const val PREFERENCES_APP_FILTER = "app.filter"

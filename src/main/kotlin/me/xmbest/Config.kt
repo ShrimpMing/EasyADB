@@ -23,10 +23,22 @@ import me.xmbest.theme.red
 import me.xmbest.theme.yellow
 import me.xmbest.util.PreferencesUtil
 import me.xmbest.util.PreferencesUtil.PREFERENCES_THEME
+import me.xmbest.util.PreferencesUtil.PREFERENCES_WINDOW_HEIGHT_DP
+import me.xmbest.util.PreferencesUtil.PREFERENCES_WINDOW_REMEMBER_HEIGHT_DP
+import me.xmbest.util.PreferencesUtil.PREFERENCES_WINDOW_REMEMBER_WIDTH_DP
+import me.xmbest.util.PreferencesUtil.PREFERENCES_WINDOW_SIZE_MODE
+import me.xmbest.util.PreferencesUtil.PREFERENCES_WINDOW_WIDTH_DP
 import java.util.*
+import kotlin.math.roundToInt
 
 object Config {
     const val STRINGS_NAME = "strings"
+
+    enum class WindowSizeMode {
+        Follow,
+        Remember,
+        Custom
+    }
 
     private val _locale = MutableStateFlow(Locale.CHINA)
     val locale = _locale.asStateFlow()
@@ -55,9 +67,12 @@ object Config {
         Pair(strings.get("env.custom"), Environment.Custom)
     )
 
+    val defaultWindowSizeDp = DpSize(1280.dp, 720.dp)
+
     private val _windowState = MutableStateFlow(
         WindowState(
-            position = WindowPosition.Aligned(Alignment.Center), size = DpSize(1280.dp, 720.dp)
+            position = WindowPosition.Aligned(Alignment.Center),
+            size = resolveWindowSizeDp()
         )
     )
 
@@ -71,9 +86,54 @@ object Config {
 
     val theme = _theme.asStateFlow()
 
-
     fun changeTheme(newTheme: Theme) {
         _theme.update { newTheme }
     }
 
+    fun getWindowSizeMode(): WindowSizeMode {
+        val modeName = PreferencesUtil.get(PREFERENCES_WINDOW_SIZE_MODE, WindowSizeMode.Follow.name)
+        return WindowSizeMode.entries.firstOrNull { it.name == modeName } ?: WindowSizeMode.Follow
+    }
+
+    fun setWindowSizeMode(mode: WindowSizeMode) {
+        PreferencesUtil.set(PREFERENCES_WINDOW_SIZE_MODE, mode.name)
+    }
+
+    fun getCustomWindowSizeDp(): DpSize {
+        val width =
+            PreferencesUtil.get(PREFERENCES_WINDOW_WIDTH_DP, defaultWindowSizeDp.width.value)
+        val height =
+            PreferencesUtil.get(PREFERENCES_WINDOW_HEIGHT_DP, defaultWindowSizeDp.height.value)
+        return DpSize(width.dp, height.dp)
+    }
+
+    fun saveCustomWindowSizeDp(size: DpSize) {
+        PreferencesUtil.set(PREFERENCES_WINDOW_WIDTH_DP, size.width.value.roundToInt())
+        PreferencesUtil.set(PREFERENCES_WINDOW_HEIGHT_DP, size.height.value.roundToInt())
+    }
+
+    private fun getRememberWindowSizeDp(): DpSize {
+        val width =
+            PreferencesUtil.get(PREFERENCES_WINDOW_REMEMBER_WIDTH_DP, defaultWindowSizeDp.width.value)
+        val height =
+            PreferencesUtil.get(PREFERENCES_WINDOW_REMEMBER_HEIGHT_DP, defaultWindowSizeDp.height.value)
+        return DpSize(width.dp, height.dp)
+    }
+
+    fun saveRememberWindowSizeDp(size: DpSize) {
+        PreferencesUtil.set(PREFERENCES_WINDOW_REMEMBER_WIDTH_DP, size.width.value.roundToInt())
+        PreferencesUtil.set(PREFERENCES_WINDOW_REMEMBER_HEIGHT_DP, size.height.value.roundToInt())
+    }
+
+    private fun resolveWindowSizeDp(): DpSize {
+        return when (getWindowSizeMode()) {
+            WindowSizeMode.Follow -> defaultWindowSizeDp
+            WindowSizeMode.Remember -> getRememberWindowSizeDp()
+            WindowSizeMode.Custom -> getCustomWindowSizeDp()
+        }
+    }
+
+    fun updateWindowSize(size: DpSize) {
+        _windowState.value.size = size
+    }
 }
