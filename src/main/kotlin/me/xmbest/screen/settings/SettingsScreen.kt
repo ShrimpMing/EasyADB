@@ -277,6 +277,7 @@ private fun ThemeSelectionGrid(
 ) {
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .clip(CircleShape)
             .background(MaterialTheme.colors.surface)

@@ -95,7 +95,7 @@ private fun DeviceInfoCard(
     memory: String?
 ) {
     Column(
-        modifier = Modifier.padding(10.dp).clip(CardShape).widthIn(min = 440.dp).heightIn(min = 224.dp)
+        modifier = Modifier.clip(CardShape).widthIn(min = 440.dp).heightIn(min = 224.dp)
             .background(MaterialTheme.colors.surface).padding(10.dp)
     ) {
         Text(
@@ -108,9 +108,13 @@ private fun DeviceInfoCard(
         if (device != null) {
             DeviceInfoItem(
                 viewModel.getString("device.serialNumber"),
-                (device.serialNumber ?: viewModel.getString("device.unknown")).plus(if (device.isRoot) "(root)" else "")
+                (device.serialNumber
+                    ?: viewModel.getString("device.unknown")).plus(if (device.isRoot) "(root)" else "")
             )
-            DeviceInfoItem(viewModel.getString("device.name"), device.name ?: viewModel.getString("device.unknown"))
+            DeviceInfoItem(
+                viewModel.getString("device.name"),
+                device.name ?: viewModel.getString("device.unknown")
+            )
             DeviceInfoItem(
                 viewModel.getString("device.buildInfo"),
                 "${device.buildDate ?: viewModel.getString("device.unknown")} (${
@@ -119,7 +123,11 @@ private fun DeviceInfoCard(
             )
             DeviceInfoItem(
                 viewModel.getString("device.cpuInfo"),
-                "${device.socModel}(${device.abis.joinToString(",")}|$coreSize ${viewModel.getString("device.core")})"
+                "${device.socModel}(${device.abis.joinToString(",")}|$coreSize ${
+                    viewModel.getString(
+                        "device.core"
+                    )
+                })"
             )
             DeviceInfoItem(
                 viewModel.getString("device.screenInfo"),
@@ -130,7 +138,8 @@ private fun DeviceInfoCard(
                 ipAddress?.removePrefix("addr:") ?: viewModel.getString("device.unknown")
             )
             DeviceInfoItem(
-                viewModel.getString("device.memoryInfo"), memory?.plus(" MB") ?: viewModel.getString("device.unknown")
+                viewModel.getString("device.memoryInfo"),
+                memory?.plus(" MB") ?: viewModel.getString("device.unknown")
             )
         } else {
             Text(
@@ -191,7 +200,8 @@ private fun DeviceVersionDisplay(
             )
 
             Text(
-                text = viewModel.getString("device.apiLevel").plus(device?.version?.apiLevel ?: "?"),
+                text = viewModel.getString("device.apiLevel")
+                    .plus(device?.version?.apiLevel ?: "?"),
                 fontSize = 14.sp,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f),
                 modifier = Modifier.align(Alignment.Center).rotate(45F)
@@ -284,8 +294,8 @@ private fun ControlPanel(
 
 @Composable
 fun FirstRow(viewModel: HomeViewModel, uiState: HomeUiState) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         // 设备信息卡片
@@ -304,7 +314,6 @@ fun FirstRow(viewModel: HomeViewModel, uiState: HomeUiState) {
             device = uiState.device,
             batteryLevel = uiState.batteryLevel,
             modifier = Modifier
-                .padding(end = 16.dp)
                 .rotate(-45F)
                 .align(Alignment.CenterVertically)
         )
@@ -313,8 +322,7 @@ fun FirstRow(viewModel: HomeViewModel, uiState: HomeUiState) {
         ControlPanel(
             onEvent = viewModel::onEvent,
             modifier = Modifier
-                .padding(end = 16.dp)
-                .size(200.dp)
+                .size(180.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colors.surface).padding(10.dp)
                 .align(Alignment.CenterVertically)
@@ -327,7 +335,7 @@ fun SecondRow(viewModel: HomeViewModel, uiState: HomeUiState) {
     Row(modifier = Modifier.fillMaxWidth()) {
         val dialogState = LocalDialogState.current
         Column(
-            modifier = Modifier.fillMaxWidth().padding(10.dp).clip(CardShape)
+            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp).clip(CardShape)
                 .background(MaterialTheme.colors.surface).padding(10.dp)
         ) {
             Text(
@@ -340,6 +348,7 @@ fun SecondRow(viewModel: HomeViewModel, uiState: HomeUiState) {
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
                 // 显示查询出的activity值弹窗
