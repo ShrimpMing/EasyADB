@@ -57,102 +57,114 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        ThemeSettingsSection(
-            title = viewModel.getString("theme.setting"),
-            themeList = Config.themeList,
-            selectedTheme = uiState.theme,
-            onThemeSelected = { viewModel.onEvent(SettingsUiEvent.UpdateTheme(it)) }
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ThemeSettingsSection(
+                title = viewModel.getString("theme.setting"),
+                themeList = Config.themeList,
+                selectedTheme = uiState.theme,
+                onThemeSelected = { viewModel.onEvent(SettingsUiEvent.UpdateTheme(it)) }
+            )
 
-        AdbConfigSection(
-            title = viewModel.getString("adb.config"),
-            envList = Config.envList,
-            selectedPath = uiState.adbPath,
-            customerPath = uiState.customerAdbPath,
-            onEnvSelected = { viewModel.onEvent(SettingsUiEvent.UpdateAdbEnv(it)) },
-            onCustomerChange = { viewModel.onEvent(SettingsUiEvent.UpdateCustomerAdb) }
-        )
+            AdbConfigSection(
+                title = viewModel.getString("adb.config"),
+                envList = Config.envList,
+                selectedPath = uiState.adbPath,
+                customerPath = uiState.customerAdbPath,
+                onEnvSelected = { viewModel.onEvent(SettingsUiEvent.UpdateAdbEnv(it)) },
+                onCustomerChange = { viewModel.onEvent(SettingsUiEvent.UpdateCustomerAdb) }
+            )
 
-        WindowSizeSection(
-            title = viewModel.getString("settings.window.size"),
-            followLabel = viewModel.getString("settings.window.mode.follow"),
-            rememberLabel = viewModel.getString("settings.window.mode.remember"),
-            customLabel = viewModel.getString("settings.window.mode.custom"),
-            widthLabel = viewModel.getString("settings.window.width"),
-            heightLabel = viewModel.getString("settings.window.height"),
-            applyLabel = viewModel.getString("settings.window.apply"),
-            mode = windowMode,
-            customWidth = customWidth,
-            customHeight = customHeight,
-            onModeChange = { mode ->
-                windowMode = mode
-                Config.setWindowSizeMode(mode)
-                when (mode) {
-                    Config.WindowSizeMode.Follow -> {
-                        Config.updateWindowSize(Config.defaultWindowSizeDp)
+            WindowSizeSection(
+                title = viewModel.getString("settings.window.size"),
+                followLabel = viewModel.getString("settings.window.mode.follow"),
+                rememberLabel = viewModel.getString("settings.window.mode.remember"),
+                customLabel = viewModel.getString("settings.window.mode.custom"),
+                widthLabel = viewModel.getString("settings.window.width"),
+                heightLabel = viewModel.getString("settings.window.height"),
+                applyLabel = viewModel.getString("settings.window.apply"),
+                mode = windowMode,
+                customWidth = customWidth,
+                customHeight = customHeight,
+                onModeChange = { mode ->
+                    windowMode = mode
+                    Config.setWindowSizeMode(mode)
+                    when (mode) {
+                        Config.WindowSizeMode.Follow -> {
+                            Config.updateWindowSize(Config.defaultWindowSizeDp)
+                        }
+
+                        Config.WindowSizeMode.Remember -> {
+                            Config.saveRememberWindowSizeDp(windowState.size)
+                        }
+
+                        Config.WindowSizeMode.Custom -> {
+                            applyCustomWindowSize()
+                        }
                     }
+                },
+                onCustomWidthChange = { value ->
+                    customWidth = value.filter { it.isDigit() }
+                },
+                onCustomHeightChange = { value ->
+                    customHeight = value.filter { it.isDigit() }
+                },
+                onApplyCustom = applyCustomWindowSize
+            )
 
-                    Config.WindowSizeMode.Remember -> {
-                        Config.saveRememberWindowSizeDp(windowState.size)
+            LabeledSection(
+                viewModel.getString("settings.other"),
+                modifier = Modifier.fillMaxWidth().padding(start = 6.dp, top = 6.dp)
+            ) {
+
+                Column {
+                    // 截图保存
+                    ScreenshotSaveSection(
+                        enableLabel = viewModel.getString("settings.screenshot.save.enable"),
+                        pathLabel = viewModel.getString("settings.screenshot.save.path"),
+                        enabled = uiState.screenshotSaveEnabled,
+                        path = uiState.screenshotSavePath,
+                        onEnabledChange = { enabled ->
+                            viewModel.onEvent(SettingsUiEvent.UpdateScreenshotSaveEnabled(enabled))
+                        },
+                        onChangePath = { viewModel.onEvent(SettingsUiEvent.UpdateScreenshotSavePath) }
+                    )
+
+                    // 清除数据
+                    Button(
+                        onClick = {
+                            DialogUtil.showWarning(
+                                dialogState = dialogState,
+                                title = viewModel.getString("settings.clearData.confirm.title"),
+                                message = viewModel.getString("settings.clearData.confirm.message"),
+                                confirmText = viewModel.getString("button.confirm"),
+                                cancelText = viewModel.getString("button.cancel"),
+                                onConfirm = {
+                                    viewModel.onEvent(SettingsUiEvent.ClearData)
+                                },
+                                onCancel = {}
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors().copy(
+                            containerColor = MaterialTheme.colors.error,
+                            contentColor = MaterialTheme.colors.onError
+                        ),
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(text = viewModel.getString("settings.clearData"), color = MaterialTheme.colors.onError)
                     }
-
-                    Config.WindowSizeMode.Custom -> {
-                        applyCustomWindowSize()
-                    }
-                }
-            },
-            onCustomWidthChange = { value ->
-                customWidth = value.filter { it.isDigit() }
-            },
-            onCustomHeightChange = { value ->
-                customHeight = value.filter { it.isDigit() }
-            },
-            onApplyCustom = applyCustomWindowSize
-        )
-
-        LabeledSection(
-            viewModel.getString("settings.other"),
-            modifier = Modifier.fillMaxWidth().padding(start = 6.dp, top = 6.dp)
-        ) {
-
-            Column {
-                // 截图保存
-                ScreenshotSaveSection(
-                    enableLabel = viewModel.getString("settings.screenshot.save.enable"),
-                    pathLabel = viewModel.getString("settings.screenshot.save.path"),
-                    enabled = uiState.screenshotSaveEnabled,
-                    path = uiState.screenshotSavePath,
-                    onEnabledChange = { enabled ->
-                        viewModel.onEvent(SettingsUiEvent.UpdateScreenshotSaveEnabled(enabled))
-                    },
-                    onChangePath = { viewModel.onEvent(SettingsUiEvent.UpdateScreenshotSavePath) }
-                )
-
-                // 清除数据
-                Button(
-                    onClick = {
-                        DialogUtil.showWarning(
-                            dialogState = dialogState,
-                            title = viewModel.getString("settings.clearData.confirm.title"),
-                            message = viewModel.getString("settings.clearData.confirm.message"),
-                            confirmText = viewModel.getString("button.confirm"),
-                            cancelText = viewModel.getString("button.cancel"),
-                            onConfirm = {
-                                viewModel.onEvent(SettingsUiEvent.ClearData)
-                            },
-                            onCancel = {}
-                        )
-                    },
-                    colors = ButtonDefaults.buttonColors().copy(
-                        containerColor = MaterialTheme.colors.error,
-                        contentColor = MaterialTheme.colors.onError
-                    ),
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text(text = viewModel.getString("settings.clearData"), color = MaterialTheme.colors.onError)
                 }
             }
+        }
+
+        Box(
+            modifier = Modifier.fillMaxSize().padding(12.dp),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            Text(
+                text = Config.buildVersion,
+                color = MaterialTheme.colors.onBackground.copy(0.6f)
+            )
         }
     }
 }

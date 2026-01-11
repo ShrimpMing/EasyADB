@@ -33,7 +33,9 @@ import kotlin.math.roundToInt
 
 object Config {
     const val STRINGS_NAME = "strings"
-
+    val buildVersion: String by lazy {
+        System.getProperty("build_version")?.ifBlank { "unknown" } ?: "unknown"
+    }
     enum class WindowSizeMode {
         Follow,
         Remember,

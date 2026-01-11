@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 
 plugins {
     kotlin("jvm")
@@ -7,9 +9,9 @@ plugins {
 }
 
 group = "me.xmbet"
-version = "1.0.0"
+version = "1.0.1"
 val appName by extra("EasyADB")
-val appVersion by extra("1.0.0")
+val appVersion by extra("1.0.1")
 
 repositories {
     mavenLocal()
@@ -47,9 +49,16 @@ compose.desktop {
     application {
         mainClass = "MainKt"
 
-        buildTypes.release.proguard {
-            isEnabled.set(true)
-            configurationFiles.from(project.file("compose-desktop.pro"))
+        buildTypes.release{
+            jvmArgs += listOf(
+                "-Denv=release",
+                "-Dbuild=${SimpleDateFormat("yyMMddHHmmss").format(Date())}",
+                "-Dbuild_version=${version}"
+            )
+            proguard{
+                isEnabled.set(true)
+                configurationFiles.from(project.file("compose-desktop.pro"))
+            }
         }
 
         nativeDistributions {
