@@ -1,24 +1,51 @@
 package me.xmbest.screen.file
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.FloatingActionButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -28,7 +55,15 @@ import androidx.compose.ui.draganddrop.awtTransferable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.nativeKeyCode
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -90,7 +125,8 @@ private fun FileScreenContent(viewModel: FileViewModel) {
     Box(
         modifier = Modifier.fillMaxSize()
             .dragAndDropTarget(
-                shouldStartDragAndDrop = ::shouldStartDragAndDrop, target = rememberDragAndDropTarget(viewModel)
+                shouldStartDragAndDrop = ::shouldStartDragAndDrop,
+                target = rememberDragAndDropTarget(viewModel)
             )
             .onKeyEvent { setKeyEvent(viewModel, uiState, it) }
             .focusRequester(requester).focusable()
@@ -187,7 +223,6 @@ private fun rememberDragAndDropTarget(viewModel: FileViewModel): DragAndDropTarg
         }
     }
 }
-
 
 /**
  * 处理键盘事件的优化版本
@@ -403,7 +438,8 @@ private fun FilterBottomBar(
 private fun DragOverlay(uiState: FileUiState) {
     if (uiState.isDragging) {
         Box(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.primary.copy(alpha = 0.1f)).padding(3.dp)
+            modifier = Modifier.fillMaxSize()
+                .background(MaterialTheme.colors.primary.copy(alpha = 0.1f)).padding(3.dp)
         ) {
             Box(
                 modifier = Modifier.fillMaxSize().border(
@@ -414,7 +450,8 @@ private fun DragOverlay(uiState: FileUiState) {
                     text = uiState.uploadTipText,
                     color = MaterialTheme.colors.primary,
                     fontSize = 18.sp,
-                    modifier = Modifier.clip(CardShape).background(MaterialTheme.colors.surface.copy(alpha = 0.9f))
+                    modifier = Modifier.clip(CardShape)
+                        .background(MaterialTheme.colors.surface.copy(alpha = 0.9f))
                         .padding(16.dp)
                 )
             }

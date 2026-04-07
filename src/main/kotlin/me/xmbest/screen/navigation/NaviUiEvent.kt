@@ -12,6 +12,7 @@ sealed class NaviUiEvent {
     sealed class DeviceManagement : NaviUiEvent() {
         data class SelectDevice(val device: IDevice) : DeviceManagement()
         data class ShowDeviceList(val show: Boolean) : DeviceManagement()
+        data class Install(val path: String) : DeviceManagement()
         data object RefreshDevice : DeviceManagement()
     }
 }

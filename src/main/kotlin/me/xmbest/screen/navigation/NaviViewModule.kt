@@ -1,7 +1,6 @@
 package me.xmbest.screen.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BorderAll
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.GridView
@@ -13,16 +12,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import me.xmbest.appStorageAbsolutePath
 import me.xmbest.base.BaseViewModel
+import me.xmbest.cmdAutoCloseEnabled
+import me.xmbest.cmdAutoCloseTimeoutSeconds
 import me.xmbest.ddmlib.DeviceManager
+import me.xmbest.ddmlib.DeviceOperate
+import me.xmbest.exec
 import me.xmbest.model.Page
 import me.xmbest.screen.app.AppScreen
 import me.xmbest.screen.customer.CustomerScreen
 import me.xmbest.screen.file.FileScreen
 import me.xmbest.screen.home.HomeScreen
 import me.xmbest.screen.settings.SettingsScreen
+import org.jetbrains.skiko.hostOs
+import java.io.File
 
-class NaviViewModule() : BaseViewModel<NaviUiState>() {
+class NaviViewModule : BaseViewModel<NaviUiState>() {
     val pageList = listOf(
         Page(
             name = getString("router.item.commonFeatures"),
@@ -88,7 +94,19 @@ class NaviViewModule() : BaseViewModel<NaviUiState>() {
             is NaviUiEvent.DeviceManagement.SelectDevice -> selectDevice(event.device)
             is NaviUiEvent.DeviceManagement.ShowDeviceList -> showDeviceList(event.show)
             is NaviUiEvent.DeviceManagement.RefreshDevice -> refreshDevice()
+            is NaviUiEvent.DeviceManagement.Install -> install(event.path)
         }
+    }
+
+    private fun install(path: String) {
+        DeviceOperate.install(
+            remoteFilePath = path,
+            isWindows = hostOs.isWindows,
+            isMacOs = hostOs.isMacOS,
+            autoCloseEnabled = cmdAutoCloseEnabled,
+            autoCloseTimeoutSeconds = cmdAutoCloseTimeoutSeconds,
+            file = File(appStorageAbsolutePath, exec.second)
+        )
     }
 
     private fun selectLeftItem(pageIndex: Int) {

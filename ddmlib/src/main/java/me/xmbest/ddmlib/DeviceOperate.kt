@@ -30,7 +30,8 @@ object DeviceOperate {
     /**
      * top命令查询的字段
      */
-    private val topColumns = listOf("pid", "user", "%cpu", "time+", "%mem", "virt", "res", "shr", "name")
+    private val topColumns =
+        listOf("pid", "user", "%cpu", "time+", "%mem", "virt", "res", "shr", "name")
     val topHeadColumns = listOf("pid", "user", "cpu", "time", "mem", "virt", "res", "shr")
 
     suspend fun startApp(packageName: String) {
@@ -137,7 +138,7 @@ object DeviceOperate {
         return files
             .map { localPath -> localPath to File(localPath).name }
             .joinToString("\n") {
-                "${DeviceManager.adbPath.value} -s $serialNumber $operation ${it.first} \"$targetPath/${it.second}\""
+                "${DeviceManager.adbPath.value} -s $serialNumber $operation \"${it.first}\" \"$targetPath/${it.second}\""
             }
     }
 
@@ -298,15 +299,26 @@ object DeviceOperate {
      * @param remoteFilePath 安装路径
      * @return 是否安装成功
      */
-    suspend fun install(remoteFilePath: String) = suspendCancellableCoroutine {
-        device?.installRemotePackage(remoteFilePath, true, object : InstallReceiver() {
-            override fun done() {
-                it.resume(
-                    if (isSuccessfullyCompleted) InstallState.Success(successMessage)
-                    else InstallState.Error(errorCode, errorMessage)
-                )
+    fun install(
+        remoteFilePath: String,
+        isWindows: Boolean = true,
+        isMacOs: Boolean = false,
+        autoCloseTimeoutSeconds: Int = CMD_CLOSE_TIMEOUT,
+        autoCloseEnabled: Boolean = true,
+        file: File
+    ) {
+        device?.let {
+            val adbCommand =
+                "${DeviceManager.adbPath.value} -s ${it.serialNumber} install \"${remoteFilePath}\""
+            Log.d(TAG, "Original ADB command: $adbCommand")
+            val safeTimeout = autoCloseTimeoutSeconds.coerceAtLeast(0)
+            val command = when {
+                isWindows -> buildWindowsCommand(adbCommand, autoCloseEnabled, safeTimeout, file)
+                isMacOs -> buildMacCommand(adbCommand, autoCloseEnabled, safeTimeout, file)
+                else -> adbCommand
             }
-        }, "-t") ?: it.resume(InstallState.NotConnected)
+            if (isMacOs) CmdUtil.runShell(command) else CmdUtil.run(command)
+        }
     }
 
     /**
@@ -341,7 +353,8 @@ object DeviceOperate {
                     root, parentPath, FileListingService.TYPE_DIRECTORY, false
                 ), false, object : FileListingService.IListingReceiver {
                     override fun setChildren(
-                        entry: FileListingService.FileEntry?, children: Array<out FileListingService.FileEntry>?
+                        entry: FileListingService.FileEntry?,
+                        children: Array<out FileListingService.FileEntry>?
                     ) {
                         it.resume(children?.asList() ?: emptyList())
                     }
