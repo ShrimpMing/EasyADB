@@ -24,15 +24,14 @@ repositories {
 
 dependencies {
     implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
-    // 扩展图标
-    implementation(compose.materialIconsExtended)
+    implementation("org.jetbrains.compose.material3:material3:${properties["material3.version"]}") // Material 3 组件
+    implementation("org.jetbrains.compose.material:material-icons-extended:${properties["material.icons.extended.version"]}") // 扩展图标
+    implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:${properties["lifecycle.viewmodel.compose.version"]}") // viewModule
 
     implementation("com.google.code.gson:gson:${properties["gson.version"]}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${properties["kotlin.version"]}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${properties["kotlin.version"]}")
 
-    implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:${properties["lifecycle.viewmodel.compose.version"]}")
     // 文件选择
     implementation("io.github.vinceglb:filekit-core:0.10.0")
     implementation("io.github.vinceglb:filekit-dialogs:0.10.0")

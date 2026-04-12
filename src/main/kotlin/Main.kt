@@ -1,13 +1,12 @@
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.xmbest.Config
 import me.xmbest.model.Theme
@@ -15,7 +14,6 @@ import me.xmbest.module.InitModule
 import me.xmbest.screen.navigation.NaviScreen
 
 @Composable
-@Preview
 fun App() {
     val theme = Config.theme.collectAsState().value
     MaterialTheme(
@@ -30,9 +28,19 @@ fun App() {
 }
 
 fun main() = application {
-    InitModule.init()
     val windowState = Config.windowState.collectAsState()
-    Window(title = "EasyADB", onCloseRequest = ::exitApplication, state = windowState.value, icon = painterResource("icon/logo.ico")) {
+    val viewModelStore = remember { ViewModelStore() }
+    val viewModelStoreOwner = remember {
+        object : ViewModelStoreOwner {
+            override val viewModelStore: ViewModelStore = viewModelStore
+        }
+    }
+    Window(
+        title = "EasyADB",
+        onCloseRequest = ::exitApplication,
+        state = windowState.value,
+        icon = painterResource("icon/logo.ico")
+    ) {
         LaunchedEffect(Unit) {
             snapshotFlow { windowState.value.size }
                 .distinctUntilChanged()
@@ -43,6 +51,12 @@ fun main() = application {
                     }
                 }
         }
-        App()
+
+        CompositionLocalProvider(
+            LocalViewModelStoreOwner provides viewModelStoreOwner
+        ) {
+            App()
+            InitModule.init()
+        }
     }
 }
