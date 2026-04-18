@@ -9,24 +9,24 @@ EasyADB 是一款桌面应用程序，旨在简化 Android 设备的管理和调
 ## 界面预览
 
 ### 设备信息
-![设备信息](img/home.png)
+![设备信息](docs/images/home.png)
 
 ### 应用管理
 > 应用列表
 
-![应用管理](img/app.png)
+![应用管理](docs/images/app.png)
 > 进程列表
 
-![进程管理](img/task.png)
+![进程管理](docs/images/task.png)
 
 ### 文件管理
-![文件管理](img/filemanager.png)
+![文件管理](docs/images/filemanager.png)
 
 ### 快捷操作
-![快捷操作](img/customer.png)
+![快捷操作](docs/images/customer.png)
 
 ### 设置页面
-![设置页面](img/settings.png)
+![设置页面](docs/images/settings.png)
 
 ## 主要特性
 
@@ -46,7 +46,7 @@ EasyADB 是一款桌面应用程序，旨在简化 Android 设备的管理和调
 
 ### 📁 文件管理
 - 浏览设备文件系统
-- 支持拖拽上传文件
+- 支持拖拽上传文件(除该文件区域可拖拽 apk 进行安装)
 - 下载设备文件到本地
 - 文件搜索功能
 - 批量文件操作

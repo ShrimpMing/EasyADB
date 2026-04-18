@@ -103,10 +103,6 @@ fun NaviScreen(viewModel: NaviViewModule = viewModel()) {
     }
 }
 
-private fun installApk(apkPath: String) {
-
-}
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Left(
