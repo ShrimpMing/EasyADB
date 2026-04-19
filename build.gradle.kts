@@ -87,6 +87,13 @@ compose.desktop {
                 pkgPackageBuildVersion = appVersion
                 iconFile.set(project.file("launcher/logo.icns"))
             }
+
+            linux {
+                installationPath = "/opt/easyadb"
+                shortcut = true
+                iconFile.set(project.file("launcher/logo.png"))
+            }
+
         }
     }
 }

@@ -24,6 +24,11 @@ jobs:
             build-command: './gradlew packageReleaseDmg'
             artifact-path: 'build/compose/binaries/main-release/dmg/**'
             artifact-name: 'macos-dmg'
+          - os: ubuntu-latest
+            java-version: '17'
+            build-command: './gradlew packageReleaseDeb'
+            artifact-path: 'build/compose/binaries/main-release/deb/**'
+            artifact-name: 'linux-deb'
     
     runs-on: ${{ matrix.os }}
     
@@ -41,6 +46,12 @@ jobs:
       - name: Grant execute permission for gradlew (Unix only)
         if: runner.os != 'Windows'
         run: chmod +x gradlew
+
+      - name: Install Linux packaging dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot
       
       - name: Build application
         run: ${{ matrix.build-command }}
