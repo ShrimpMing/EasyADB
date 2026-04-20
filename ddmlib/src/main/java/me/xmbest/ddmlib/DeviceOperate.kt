@@ -138,7 +138,7 @@ object DeviceOperate {
         return files
             .map { localPath -> localPath to File(localPath).name }
             .joinToString("\n") {
-                "${DeviceManager.adbExecutablePath.value} -s $serialNumber $operation \"${it.first}\" \"$targetPath/${it.second}\""
+                "\"${DeviceManager.adbExecutablePath.value}\" -s $serialNumber $operation \"${it.first}\" \"$targetPath/${it.second}\""
             }
     }
 
@@ -362,7 +362,7 @@ object DeviceOperate {
     ) {
         device?.let {
             val adbCommand =
-                "${DeviceManager.adbExecutablePath.value} -s ${it.serialNumber} install \"${remoteFilePath}\""
+                "\"${DeviceManager.adbExecutablePath.value}\" -s ${it.serialNumber} install \"${remoteFilePath}\""
             Log.d(TAG, "ADB install command: $adbCommand")
             val safeTimeout = autoCloseTimeoutSeconds.coerceAtLeast(0)
             val command = when {
