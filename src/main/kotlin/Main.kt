@@ -12,6 +12,7 @@ import me.xmbest.Config
 import me.xmbest.model.Theme
 import me.xmbest.module.InitModule
 import me.xmbest.screen.navigation.NaviScreen
+import me.xmbest.util.ErrorLogger
 
 @Composable
 fun App() {
@@ -27,36 +28,41 @@ fun App() {
     }
 }
 
-fun main() = application {
-    val windowState = Config.windowState.collectAsState()
-    val viewModelStore = remember { ViewModelStore() }
-    val viewModelStoreOwner = remember {
-        object : ViewModelStoreOwner {
-            override val viewModelStore: ViewModelStore = viewModelStore
-        }
+fun main() {
+    Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
+        ErrorLogger.log(throwable)
     }
-    Window(
-        title = "EasyADB",
-        onCloseRequest = ::exitApplication,
-        state = windowState.value,
-        icon = painterResource("icon/logo.ico")
-    ) {
-        LaunchedEffect(Unit) {
-            snapshotFlow { windowState.value.size }
-                .distinctUntilChanged()
-                .collect { sizeDp ->
-                    println("width: ${sizeDp.width.value},height: ${sizeDp.height.value}")
-                    if (Config.getWindowSizeMode() == Config.WindowSizeMode.Remember) {
-                        Config.saveRememberWindowSizeDp(sizeDp)
-                    }
-                }
+    application {
+        val windowState = Config.windowState.collectAsState()
+        val viewModelStore = remember { ViewModelStore() }
+        val viewModelStoreOwner = remember {
+            object : ViewModelStoreOwner {
+                override val viewModelStore: ViewModelStore = viewModelStore
+            }
         }
-
-        CompositionLocalProvider(
-            LocalViewModelStoreOwner provides viewModelStoreOwner
+        Window(
+            title = "EasyADB",
+            onCloseRequest = ::exitApplication,
+            state = windowState.value,
+            icon = painterResource("icon/logo.ico")
         ) {
-            App()
-            InitModule.init()
+            LaunchedEffect(Unit) {
+                snapshotFlow { windowState.value.size }
+                    .distinctUntilChanged()
+                    .collect { sizeDp ->
+                        println("width: ${sizeDp.width.value},height: ${sizeDp.height.value}")
+                        if (Config.getWindowSizeMode() == Config.WindowSizeMode.Remember) {
+                            Config.saveRememberWindowSizeDp(sizeDp)
+                        }
+                    }
+            }
+
+            CompositionLocalProvider(
+                LocalViewModelStoreOwner provides viewModelStoreOwner
+            ) {
+                App()
+                InitModule.init()
+            }
         }
     }
 }
