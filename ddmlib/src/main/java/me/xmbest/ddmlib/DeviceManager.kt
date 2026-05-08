@@ -9,7 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -57,7 +57,7 @@ object DeviceManager {
 
     init {
         coroutineScope.launch {
-            devices.collectLatest {
+            devices.collect {
                 if (it.isEmpty()) {
                     _device.update { null }
                 } else if (device.value == null || device.value !in devices.value) {

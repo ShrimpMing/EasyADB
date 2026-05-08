@@ -9,7 +9,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.xmbest.screenshotSaveAbsolutePath
 import me.xmbest.screenshotSaveEnabled
@@ -90,7 +90,7 @@ class HomeViewModel : BaseViewModel<HomeUiState>() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            DeviceManager.device.collectLatest { device ->
+            DeviceManager.device.collect { device ->
                 runCatching {
                     _uiState.value = _uiState.value.copy(
                         device = device,

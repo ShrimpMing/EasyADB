@@ -12,7 +12,6 @@ import androidx.lifecycle.viewModelScope
 import com.android.ddmlib.IDevice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import me.xmbest.appStorageAbsolutePath
 import me.xmbest.base.BaseViewModel
@@ -69,13 +68,13 @@ class NaviViewModule : BaseViewModel<NaviUiState>() {
 
     init {
         viewModelScope.launch(Dispatchers.Default) {
-            DeviceManager.device.collectLatest {
+            DeviceManager.device.collect {
                 _uiState.value = _uiState.value.copy(device = it)
             }
         }
 
         viewModelScope.launch(Dispatchers.Default) {
-            DeviceManager.devices.collectLatest {
+            DeviceManager.devices.collect {
                 _uiState.value = _uiState.value.copy(devices = it)
             }
         }
