@@ -8,7 +8,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-group = "me.xmbet"
+group = "me.newbieeming"
 version = "1.0.3"
 val appName by extra("EasyADB")
 val appVersion by extra("1.0.3")

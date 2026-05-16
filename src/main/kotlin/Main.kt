@@ -8,11 +8,11 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import kotlinx.coroutines.flow.distinctUntilChanged
-import me.xmbest.Config
-import me.xmbest.model.Theme
-import me.xmbest.module.InitModule
-import me.xmbest.screen.navigation.NaviScreen
-import me.xmbest.util.ErrorLogger
+import me.newbieeming.Config
+import me.newbieeming.model.Theme
+import me.newbieeming.module.InitModule
+import me.newbieeming.screen.navigation.NaviScreen
+import me.newbieeming.util.ErrorLogger
 
 @Composable
 fun App() {
